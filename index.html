@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Job Quest // Interactive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- VARIABLES --- */
+        :root {
+            --ink-black: #1a1a1a;
+            --paper-white: #ffffff;
+            --pop-pink: #ff80bf;
+            --pop-green: #aaff00;
+            --pop-cyan: #00eeff;
+            --pop-purple: #aa80ff;
+            --pop-yellow: #ffdd00;
+            --pop-orange: #ff9900;
+            --pop-red: #ff5555;
+            
+            --border-thick: 3px solid var(--ink-black);
+            --shadow-hard: 5px 5px 0px var(--ink-black);
+            --shadow-hover: 2px 2px 0px var(--ink-black);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #fffbf0;
+            background-image: radial-gradient(var(--ink-black) 0.8px, transparent 0.8px);
+            background-size: 18px 18px;
+            color: var(--ink-black);
+            overflow-x: hidden;
+            padding-bottom: 100px;
+        }
+
+        /* --- NAVIGATION --- */
+        .floating-nav {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--paper-white); border: var(--border-thick);
+            box-shadow: var(--shadow-hard); border-radius: 50px;
+            padding: 10px 30px; display: flex; justify-content: center; align-items: center;
+            z-index: 100; width: auto; min-width: 300px;
+        }
+        .nav-links { display: flex; gap: 15px; }
+        .nav-btn {
+            text-decoration: none; color: var(--ink-black); font-weight: 800;
+            padding: 8px 20px; border-radius: 30px; border: 2px solid transparent;
+            transition: 0.2s; font-size: 1rem; text-transform: uppercase;
+        }
+        .nav-btn:hover { background: #eee; border: 2px solid #ccc; }
+        .nav-btn.active {
+            background: var(--pop-cyan); border: 2px solid var(--ink-black);
+            box-shadow: 2px 2px 0px var(--ink-black); transform: rotate(-2deg);
+        }
+
+        /* --- HERO --- */
+        .hero { text-align: center; padding: 160px 20px 40px; }
+        .hero h1 {
+            font-size: 7rem; line-height: 0.9; font-weight: 900; text-transform: uppercase;
+            -webkit-text-stroke: 3px var(--ink-black); color: var(--paper-white);
+            text-shadow: 8px 8px 0px var(--pop-purple); margin-bottom: 25px; 
+            transform: rotate(-1.5deg); letter-spacing: -2px;
+        }
+        .hero p {
+            font-size: 1.5rem; font-weight: 700; background: var(--pop-yellow);
+            display: inline-block; padding: 12px 24px; border: var(--border-thick);
+            box-shadow: 5px 5px 0px var(--ink-black); transform: rotate(1deg);
+        }
+        @media (max-width: 768px) { .hero h1 { font-size: 4rem; -webkit-text-stroke: 1.5px var(--ink-black); } }
+
+        .spacer-large { height: 80px; } 
+
+        /* --- CATEGORY SELECTOR --- */
+        .cat-menu-container { max-width: 1100px; margin: 0 auto 60px; padding: 0 20px; text-align: center; }
+        .section-title-sticker {
+            display: inline-block; font-size: 2.5rem; font-weight: 900;
+            background: var(--ink-black); color: var(--pop-pink);
+            padding: 15px 40px; margin-bottom: 40px; border-radius: 15px;
+            transform: rotate(1deg); box-shadow: 8px 8px 0px rgba(0,0,0,0.15);
+            text-transform: uppercase; border: 2px solid transparent;
+        }
+        .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 10px; }
+        .cat-btn {
+            background: var(--paper-white); border: 2px solid var(--ink-black);
+            padding: 15px 10px; border-radius: 12px; font-weight: 800;
+            text-decoration: none; color: var(--ink-black);
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.1); transition: all 0.1s;
+            display: flex; align-items: center; justify-content: center;
+            text-transform: uppercase; font-size: 0.85rem; line-height: 1.2; cursor: pointer;
+        }
+        .cat-btn:hover {
+            transform: translate(-3px, -3px); box-shadow: 6px 6px 0px var(--ink-black);
+            background: var(--pop-green); z-index: 10; border: 2px solid var(--ink-black);
+        }
+
+        /* --- FILTER SYSTEM --- */
+        .filter-container {
+            max-width: 1100px; margin: 0 auto 60px; padding: 20px;
+            background: var(--paper-white); border: var(--border-thick);
+            border-radius: 20px; box-shadow: var(--shadow-hard);
+        }
+        .filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 3px dashed #ddd; padding-bottom: 15px; }
+        .filter-title { font-size: 1.8rem; font-weight: 900; text-transform: uppercase; color: var(--ink-black); }
+        .reset-btn { background: var(--pop-red); color: white; border: 2px solid var(--ink-black); padding: 5px 15px; border-radius: 20px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .reset-btn:active { transform: scale(0.95); }
+        .filter-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; }
+        @media (max-width: 768px) { .filter-grid { grid-template-columns: 1fr; } }
+        .filter-group h4 { font-weight: 900; margin-bottom: 10px; text-transform: uppercase; }
+        .range-label { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 700; margin-bottom: 5px; }
+        input[type=range] { width: 100%; accent-color: var(--ink-black); height: 15px; }
+        .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+        .checkbox-label { display: flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; }
+        .checkbox-input { width: 20px; height: 20px; border: 2px solid black; accent-color: var(--pop-green); }
+        .skill-picker { max-height: 150px; overflow-y: auto; border: 2px solid #ddd; padding: 10px; border-radius: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
+        .skill-tag { font-size: 0.8rem; padding: 4px 8px; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; background: #f9f9f9; transition: 0.2s; }
+        .skill-tag:hover { background: #eee; border-color: #999; }
+        .skill-tag.selected { background: var(--pop-purple); color: white; border: 1px solid var(--ink-black); transform: scale(1.05); }
+
+        /* --- COMPARE TOGGLE --- */
+        .compare-toggle-bar { text-align: center; margin-bottom: 30px; }
+        .toggle-btn { background: #ddd; border: var(--border-thick); padding: 10px 30px; border-radius: 30px; font-weight: 900; cursor: pointer; font-size: 1.2rem; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .toggle-btn.active { background: var(--pop-orange); box-shadow: 4px 4px 0px var(--ink-black); transform: rotate(-1deg); }
+        .compare-fab { position: fixed; bottom: 30px; right: 30px; background: var(--ink-black); color: var(--pop-cyan); padding: 15px 30px; border-radius: 50px; font-weight: 900; border: 3px solid var(--pop-cyan); box-shadow: 5px 5px 0px rgba(0,0,0,0.3); cursor: pointer; z-index: 200; display: none; animation: bounceIn 0.3s; }
+        @keyframes bounceIn { from{transform:scale(0);} to{transform:scale(1);} }
+
+        /* --- GRID & CARD --- */
+        .container { max-width: 1300px; margin: 0 auto; padding: 20px; }
+        .category-block { scroll-margin-top: 120px; margin-bottom: 100px; }
+        .category-header { display: inline-block; font-size: 2rem; font-weight: 900; background: var(--ink-black); color: var(--pop-green); padding: 10px 30px; margin-bottom: 25px; border-radius: 15px; transform: rotate(-1deg); box-shadow: 6px 6px 0px rgba(0,0,0,0.2); text-transform: uppercase; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
+        .card { background: var(--paper-white); border: var(--border-thick); border-radius: 18px; padding: 18px; position: relative; box-shadow: var(--shadow-hard); transition: all 0.1s; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px; overflow: hidden; }
+        .card:hover { transform: translate(3px, 3px); box-shadow: var(--shadow-hover); background-color: #f0fff4; }
+        .card.selected-compare { border: 4px solid var(--pop-orange); background-color: #fff8e0; transform: translate(3px, 3px); box-shadow: none; }
+        .card.selected-compare::before { content: 'VS'; position: absolute; top: 10px; right: 10px; background: var(--pop-orange); color: black; font-weight: 900; padding: 5px 10px; border-radius: 50%; border: 2px solid black; z-index: 10; }
+        .card-deco { position: absolute; top: -15px; right: -15px; width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--ink-black); opacity: 0.5; z-index: 0; }
+        .card h3 { font-size: 1.4rem; font-weight: 900; line-height: 1.1; z-index: 1; margin-bottom: 8px; color: var(--ink-black); }
+        .card p { font-size: 0.95rem; font-weight: 500; color: #444; z-index: 1; line-height: 1.4; flex-grow: 1; }
+        .card-footer { margin-top: 15px; display: flex; gap: 8px; flex-wrap: wrap; z-index: 1; align-items: center; border-top: 2px dashed #ddd; padding-top: 10px; }
+        .pill { font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border: 2px solid var(--ink-black); border-radius: 50px; background: var(--paper-white); text-transform: uppercase; }
+
+        /* --- LIBRARY SECTION --- */
+        #library-section { text-align: center; padding: 80px 20px; background: #f4f4f0; border-top: 4px dashed var(--ink-black); margin-top: 50px; }
+        .lib-tabs { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; }
+        .lib-tab { background: white; border: 2px solid var(--ink-black); padding: 8px 20px; border-radius: 20px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .lib-tab.active { background: var(--pop-purple); color: white; transform: rotate(-2deg); box-shadow: 3px 3px 0px var(--ink-black); }
+        .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; perspective: 1000px; }
+        .lib-card { background-color: transparent; width: 100%; height: 220px; perspective: 1000px; cursor: pointer; }
+        .lib-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; border-radius: 15px; box-shadow: var(--shadow-hard); border: var(--border-thick); }
+        .lib-card:hover .lib-card-inner { transform: rotateY(180deg); }
+        .lib-front, .lib-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px; }
+        .lib-front { background-color: white; color: black; }
+        .lib-back { background-color: var(--ink-black); color: var(--pop-green); transform: rotateY(180deg); text-align: left; align-items: flex-start; overflow-y: auto; }
+        .lib-icon { font-size: 3rem; margin-bottom: 10px; }
+        .lib-title { font-size: 1.5rem; font-weight: 900; line-height: 1; text-transform: uppercase; }
+        .lib-cat { font-size: 0.8rem; font-weight: 700; background: #eee; padding: 2px 8px; border-radius: 10px; margin-top: 10px; border: 1px solid black; }
+        .lib-desc { font-size: 0.9rem; line-height: 1.4; font-weight: 500; }
+
+        /* --- MODALS --- */
+        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); display: none; z-index: 999; justify-content: center; align-items: center; padding: 10px; }
+        .modal-box { background: var(--paper-white); width: 100%; max-width: 850px; max-height: 90vh; overflow-y: auto; border: 4px solid var(--ink-black); border-radius: 25px; box-shadow: 15px 15px 0px var(--pop-orange); padding: 30px; position: relative; animation: popIn 0.3s; }
+        .modal-box.compare-box { max-width: 1200px; border-color: var(--ink-black); box-shadow: 20px 20px 0px rgba(0,0,0,0.2); } 
+        .modal-box.skill-info-box { max-width: 400px; border-color: var(--pop-purple); box-shadow: 8px 8px 0px var(--ink-black); text-align: center; }
+
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .btn-close { position: absolute; top: 20px; right: 20px; background: var(--pop-red); width: 45px; height: 45px; border: 3px solid var(--ink-black); border-radius: 50%; color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 3px 3px 0px var(--ink-black); z-index: 10; }
+        .modal-header { margin-bottom: 30px; border-bottom: 4px dashed var(--ink-black); padding-bottom: 20px; }
+        .modal-title { font-size: 2.5rem; font-weight: 900; line-height: 1; margin-bottom: 10px; text-transform: uppercase; }
+        .modal-cat { background: var(--pop-cyan); padding: 5px 15px; border: 2px solid var(--ink-black); font-weight: 700; transform: rotate(-1deg); display: inline-block; }
+        .modal-body { display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; }
+        
+        /* Pill Clickable Style */
+        .pill.clickable { cursor: pointer; transition: 0.2s; position: relative; }
+        .pill.clickable:hover { background: var(--pop-green) !important; color: black; transform: scale(1.1) rotate(-3deg); border-color: black; z-index: 5; box-shadow: 2px 2px 0px black; }
+        .pill.clickable::after { content: '?'; position: absolute; top: -5px; right: -5px; font-size: 0.6rem; background: black; color: white; width: 15px; height: 15px; border-radius: 50%; display: flex; justify-content: center; align-items: center; opacity: 0; transition: 0.2s; }
+        .pill.clickable:hover::after { opacity: 1; }
+
+        .compare-wrapper { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+        .vs-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--pop-yellow); border: 4px solid var(--ink-black); padding: 15px; border-radius: 50%; font-size: 2rem; font-weight: 900; z-index: 20; box-shadow: 0 0 0 10px rgba(255,255,255,0.5); animation: vsPulse 1s infinite alternate; }
+        @keyframes vsPulse { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.2); } }
+        .compare-col { padding: 30px; border: 2px solid var(--ink-black); position: relative; background: #fff; transition: 0.3s; }
+        .compare-col:first-child { background: #e0f7fa; border-right: none; border-radius: 20px 0 0 20px; }
+        .compare-col:last-child { background: #fce4ec; border-left: none; border-radius: 0 20px 20px 0; }
+        .compare-col:hover { z-index: 5; transform: scale(1.02); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+
+        .info-group { margin-bottom: 20px; }
+        .info-label { font-weight: 800; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 5px; display: block; color: #666; }
+        .info-content { font-size: 1.1rem; font-weight: 600; line-height: 1.5; }
+        .salary-card { background: var(--ink-black); color: var(--pop-green); padding: 15px; border-radius: 12px; font-family: 'Courier New', monospace; border: 2px solid #444; }
+        .bar-wrapper { width: 100%; height: 28px; background: #eee; border: 3px solid var(--ink-black); border-radius: 20px; overflow: hidden; margin-top: 5px; position: relative; }
+        .bar-fill { height: 100%; width: 0%; border-right: 3px solid var(--ink-black); transition: width 0.6s; }
+
+    </style>
+</head>
+<body id="home">
+
+    <div class="floating-nav">
+        <div class="nav-links">
+            <a href="#home" class="nav-btn active" onclick="setActive(this)">Home</a>
+            <a href="#category-menu" class="nav-btn" onclick="setActive(this)">Tech Jobs</a>
+            <a href="#library-section" class="nav-btn" onclick="setActive(this)">Codex</a>
+        </div>
+    </div>
+
+    <section class="hero">
+        <h1>Tech Career<br><span style="color: var(--pop-pink); text-shadow: 8px 8px 0px var(--ink-black);">Database</span></h1>
+        <p>130+ Roles. Full Data. Expanded Missions.</p>
+    </section>
+
+    <div class="spacer-large"></div>
+
+    <section class="cat-menu-container" id="category-menu">
+        <div class="section-title-sticker">Select Category</div>
+        <div class="cat-grid" id="cat-grid-target"></div>
+    </section>
+
+    <section class="filter-container" id="filter-panel">
+        <div class="filter-header">
+            <div class="filter-title">Job Filter System</div>
+            <button class="reset-btn" onclick="resetFilters()">RESET ALL</button>
+        </div>
+        <div class="filter-grid">
+            <div class="filter-group">
+                <h4>Min. Salary (IDR/Month)</h4>
+                <div class="range-label"><span>Junior Level</span> <span id="val-jr">0 jt</span></div>
+                <input type="range" id="range-jr" min="0" max="30" value="0" oninput="updateFilter()">
+                <div class="range-label" style="margin-top:10px;"><span>Mid Level</span> <span id="val-mid">0 jt</span></div>
+                <input type="range" id="range-mid" min="0" max="50" value="0" oninput="updateFilter()">
+                <div class="range-label" style="margin-top:10px;"><span>Senior Level</span> <span id="val-sr">0 jt</span></div>
+                <input type="range" id="range-sr" min="0" max="100" value="0" oninput="updateFilter()">
+            </div>
+            <div class="filter-group">
+                <h4>Work Type & Diff</h4>
+                <div class="checkbox-group">
+                    <label class="checkbox-label"><input type="checkbox" class="checkbox-input f-remote" value="Tinggi" onchange="updateFilter()"> High Remote Potential</label>
+                    <label class="checkbox-label"><input type="checkbox" class="checkbox-input f-remote" value="Sedang" onchange="updateFilter()"> Hybrid / Medium</label>
+                    <label class="checkbox-label"><input type="checkbox" class="checkbox-input f-remote" value="Rendah" onchange="updateFilter()"> On-Site / Low</label>
+                </div>
+                <div class="checkbox-group" style="margin-top:20px;">
+                    <label class="checkbox-label"><input type="checkbox" class="checkbox-input f-diff" value="Mudah" onchange="updateFilter()"> Entry Level / Easy</label>
+                    <label class="checkbox-label"><input type="checkbox" class="checkbox-input f-diff" value="Sedang" onchange="updateFilter()"> Medium</label>
+                    <label class="checkbox-label"><input type="checkbox" class="checkbox-input f-diff" value="Tinggi" onchange="updateFilter()"> Hard / Expert</label>
+                </div>
+            </div>
+            <div class="filter-group">
+                <h4>Pick Your Skills</h4>
+                <input type="text" id="skill-search" placeholder="Search skill..." style="width:100%; padding:8px; margin-bottom:8px; border:2px solid black; border-radius:10px;" onkeyup="filterSkillTags()">
+                <div class="skill-picker" id="skill-container"></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="compare-toggle-bar">
+        <button class="toggle-btn" id="compare-mode-btn" onclick="toggleCompareMode()">
+            <span>⚔️ ENABLE COMPARE MODE</span>
+        </button>
+    </div>
+
+    <div class="container" id="main-container"></div>
+
+    <button class="compare-fab" id="compare-fab" onclick="openCompareModal()">
+        COMPARE SELECTED (0/2)
+    </button>
+
+    <section id="library-section">
+        <div class="section-title-sticker" style="background: var(--pop-purple); color:white; transform: rotate(-1deg);">THE TECH CODEX</div>
+        
+        <div class="lib-tabs">
+            <button class="lib-tab active" onclick="filterLibrary('all', this)">ALL</button>
+            <button class="lib-tab" onclick="filterLibrary('Language', this)">LANGUAGES</button>
+            <button class="lib-tab" onclick="filterLibrary('Framework', this)">FRAMEWORKS</button>
+            <button class="lib-tab" onclick="filterLibrary('Tool', this)">TOOLS</button>
+            <button class="lib-tab" onclick="filterLibrary('Concept', this)">CONCEPTS</button>
+            <button class="lib-tab" onclick="filterLibrary('Soft Skill', this)">SOFT SKILLS</button>
+        </div>
+
+        <div class="lib-grid" id="lib-grid-target"></div>
+    </section>
+
+    <div class="modal-backdrop" id="questModal">
+        <div class="modal-box">
+            <button class="btn-close" onclick="closeModal('questModal')">X</button>
+            <div class="modal-header">
+                <h2 class="modal-title" id="m-title">...</h2>
+                <span class="modal-cat" id="m-cat">...</span>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="info-group"><span class="info-label">Mission Objective</span><p class="info-content" id="m-focus">...</p></div>
+                    <div class="info-group"><span class="info-label">Required Inventory (Click for Info)</span><div id="m-skills" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:5px;"></div></div>
+                    <div class="info-group"><span class="info-label">Loot Drop (Monthly Salary IDR)</span><div class="salary-card" id="m-salary"></div></div>
+                </div>
+                <div>
+                    <div class="info-group"><span class="info-label">Popularity</span><div class="bar-wrapper"><div class="bar-fill" id="bar-pop" style="background: var(--pop-cyan);"></div></div><small id="txt-pop">...</small></div>
+                    <div class="info-group"><span class="info-label">Difficulty</span><div class="bar-wrapper"><div class="bar-fill" id="bar-diff" style="background: var(--pop-yellow);"></div></div><small id="txt-diff">...</small></div>
+                    <div class="info-group"><span class="info-label">AI Survival Rate</span><div class="bar-wrapper"><div class="bar-fill" id="bar-ai"></div></div><small id="txt-ai-reason">...</small></div>
+                    <div class="info-group"><span class="info-label">Recommended Class (MBTI)</span><div id="m-mbti" style="background: #eee; padding: 10px; text-align:center; font-weight:bold;">...</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="skillDefModal" style="z-index:1001;">
+        <div class="modal-box skill-info-box">
+            <button class="btn-close" onclick="closeModal('skillDefModal')">X</button>
+            <div style="margin-top:20px;">
+                <h2 id="skill-def-title" style="font-size:2rem; color:var(--pop-purple); text-transform:uppercase; margin-bottom:15px;">SKILL NAME</h2>
+                <p id="skill-def-desc" style="font-size:1.1rem; line-height:1.6;">Skill description goes here...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="compareModal">
+        <div class="modal-box compare-box">
+            <button class="btn-close" onclick="closeModal('compareModal')">X</button>
+            <div class="modal-header" style="text-align:center; border:none;">
+                <h2 class="modal-title" style="color:var(--pop-orange); font-size:3rem; text-shadow:3px 3px 0px black;">BATTLE ARENA</h2>
+            </div>
+            <div class="compare-wrapper">
+                <div class="vs-badge">VS</div>
+                <div id="compare-left"></div>
+                <div id="compare-right"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================
+           DATABASE 1: JOBS (130 ITEMS - UNCHANGED)
+           ========================================================== */
+        const jobsDB = [
+            // ... [BAGIAN INI ADALAH COPY-PASTE DARI DATA SEBELUMNYA] ...
+            // Saya menyalin seluruh 130 data di sini untuk memastikan kelengkapan.
+            { cat: "Web3 & Blockchain", title: "Blockchain Developer", focus: "Membangun arsitektur rantai blok (Core). Daily Task: Merancang protokol konsensus, mengelola node jaringan P2P, dan mengaudit keamanan kriptografi menggunakan Go atau Rust.", skills: "Go, Rust, C++, Cryptography", salJr: "12 - 18 Juta", salMid: "18 - 35 Juta", salSr: "35 - 60 Juta+", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI jago buat kode, tapi keamanan smart contract butuh audit manusia.", diff: "Tinggi (Butuh Kriptografi)", mbti: "INTP, INTJ (Logis)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Web3 & Blockchain", title: "Smart Contract Engineer", focus: "Menulis kontrak otomatis di blockchain. Daily Task: Menulis kode Solidity untuk DeFi, melakukan unit testing dengan Hardhat, dan optimasi gas fee.", skills: "Solidity (Ethereum), Vyper, Remix", salJr: "14 - 20 Juta", salMid: "20 - 40 Juta", salSr: "40 - 70 Juta+", aiRisk: "Sedang (Kolaborasi)", aiReason: "Kode bisa di-generate, logika keamanan harus divalidasi manusia.", diff: "Tinggi", mbti: "INTP, ISTJ (Detail)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Web3 & Blockchain", title: "Web3 Developer", focus: "Frontend yang terkoneksi ke dompet kripto. Daily Task: Mengintegrasikan UI React dengan Metamask menggunakan Ethers.js dan menampilkan data on-chain.", skills: "ethers.js, web3.js, React", salJr: "10 - 16 Juta", salMid: "16 - 30 Juta", salSr: "30 - 55 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Percepatan coding frontend, integrasi wallet butuh logika manusia.", diff: "Sedang", mbti: "INTP, INFP (Kreatif)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Web3 & Blockchain", title: "Blockchain Architect", focus: "Desain solusi infrastruktur desentralisasi. Daily Task: Memilih platform blockchain yang tepat (Private vs Public) untuk klien enterprise dan merancang topologi jaringan.", skills: "Hyperledger, Private/Public Chains", salJr: "25 - 35 Juta", salMid: "35 - 60 Juta", salSr: "60 - 100 Juta+", aiRisk: "Sulit", aiReason: "Membutuhkan desain sistem kompleks dan keputusan strategis.", diff: "Sangat Tinggi", mbti: "INTJ, ENTJ (Strategis)", remote: "Tinggi", pop: "Rendah (Sangat Spesifik)" },
+            { cat: "Web3 & Blockchain", title: "Tokenomics Expert", focus: "Desain ekonomi token/kripto. Daily Task: Mensimulasikan model inflasi token, merancang insentif staking, dan menganalisis keseimbangan supply-demand.", skills: "Game Theory, Macroeconomics, Math", salJr: "15 - 25 Juta", salMid: "25 - 40 Juta", salSr: "40 - 70 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI bantu simulasi model ekonomi, manusia tentukan insentif psikologis.", diff: "Tinggi (Ekonomi+Math)", mbti: "INTP, ENTJ (Teoritis)", remote: "Tinggi", pop: "Rendah (Niche)" },
+            { cat: "Web3 & Blockchain", title: "NFT Developer", focus: "Spesialis standar token aset digital. Daily Task: Membuat smart contract ERC-721, generate metadata gambar secara programatis, dan upload ke IPFS.", skills: "ERC-721, ERC-1155, Metadata storage", salJr: "10 - 15 Juta", salMid: "15 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Mudah", aiReason: "Generasi metadata dan aset sangat mudah diotomasi AI.", diff: "Rendah - Sedang", mbti: "ISFP, INFP (Artistik)", remote: "Tinggi", pop: "Berpotensi Rendah" },
+            { cat: "Process & Management", title: "Scrum Master", focus: "Fasilitator tim (bukan bos, tapi pelatih proses). Daily Task: Memimpin Daily Standup, membuang blocker tim, dan memfasilitasi Sprint Retrospective.", skills: "Scrum Guide, Coaching, Conflict Resol.", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sulit", aiReason: "Fokus pada dinamika tim, emosi manusia, dan resolusi konflik.", diff: "Sedang (Butuh Sertifikasi)", mbti: "ENFJ, ESFJ (Sosial)", remote: "Sedang (Hybrid)", pop: "Sedang" },
+            { cat: "Process & Management", title: "Agile Coach", focus: "Mengajarkan metodologi Agile ke satu perusahaan. Daily Task: Mentoring para Scrum Master, audit proses delivery tim, dan transformasi budaya kerja.", skills: "Kanban, SAFe, Organizational Change", salJr: "15 - 25 Juta", salMid: "25 - 40 Juta", salSr: "40 - 65 Juta", aiRisk: "Sulit", aiReason: "Mengubah pola pikir organisasi butuh sentuhan manusia (human touch).", diff: "Tinggi (Butuh Pengalaman)", mbti: "ENFJ, ENFP (Mentor)", remote: "Sedang (Hybrid)", pop: "Sedang" },
+            { cat: "Process & Management", title: "Engineering Manager", focus: "Mengurus karir & kinerja manusia (programmer). Daily Task: 1-on-1 dengan staff, review performa, planning hiring, dan menjaga kesehatan mental tim.", skills: "People Management, Hiring, Mentoring", salJr: "25 - 35 Juta", salMid: "35 - 60 Juta", salSr: "60 - 90 Juta+", aiRisk: "Sulit", aiReason: "Mentoring karir, empati, dan manajemen konflik tak bisa di-AI-kan.", diff: "Tinggi (Seniority)", mbti: "ENTJ, ESTJ (Pemimpin)", remote: "Sedang (Hybrid)", pop: "Tinggi" },
+            { cat: "Process & Management", title: "Developer Advocate (DevRel)", focus: "Juru bicara teknis ke komunitas developer. Daily Task: Membuat tutorial coding, berbicara di konferensi tech, dan mengumpulkan feedback komunitas.", skills: "Public Speaking, Content Creation, Coding", salJr: "10 - 15 Juta", salMid: "15 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Konten bisa dibantu AI, tapi hubungan komunitas butuh personalitas.", diff: "Sedang", mbti: "ENFP, ENTP (Komunikator)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Process & Management", title: "Tech Lead", focus: "Pemimpin teknis dalam tim kecil. Daily Task: Coding fitur sulit, review PR junior, dan memutuskan struktur database atau library yang dipakai.", skills: "System Design, Code Review, Leadership", salJr: "20 - 30 Juta", salMid: "30 - 50 Juta", salSr: "50 - 80 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Review kode dibantu AI, tapi keputusan arsitektur tetap di manusia.", diff: "Tinggi", mbti: "INTJ, ENTJ (Keputusan)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Process & Management", title: "CTO (Chief Technology Officer)", focus: "Eksekutif tertinggi strategi teknologi. Daily Task: Pitching ke investor, menentukan roadmap teknologi 5 tahunan, dan mitigasi risiko bisnis.", skills: "Strategic Planning, Business Acumen", salJr: "30 - 50 Juta (Startup)", salMid: "50 - 100 Juta", salSr: "100 - 200 Juta+", aiRisk: "Sulit", aiReason: "Tanggung jawab strategi bisnis dan kepemimpinan visioner.", diff: "Sangat Tinggi", mbti: "ENTJ, INTJ (Visioner)", remote: "Sedang (Hybrid)", pop: "Sedang" },
+            { cat: "Specialized Software", title: "DevSecOps Engineer", focus: "Keamanan yang terintegrasi dalam DevOps pipeline. Daily Task: Mengatur tools scan otomatis (SAST/DAST) di Jenkins/GitLab CI agar kode aman sebelum deploy.", skills: "CI/CD Security scanning, SAST/DAST", salJr: "12 - 18 Juta", salMid: "18 - 30 Juta", salSr: "30 - 55 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI otomatisasi scanning celah keamanan, manusia analisis prioritas.", diff: "Tinggi", mbti: "ISTJ, INTJ (Sistematis)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Specialized Software", title: "Accessibility (A11y) Specialist", focus: "Memastikan web bisa dipakai penyandang disabilitas. Daily Task: Audit website menggunakan screen reader (NVDA) dan memperbaiki navigasi keyboard.", skills: "WCAG guidelines, Screen readers (NVDA)", salJr: "7 - 11 Juta", salMid: "11 - 18 Juta", salSr: "18 - 30 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI bisa scan error aksesibilitas, tapi nuansa pengalaman butuh tes manusia.", diff: "Sedang", mbti: "ISFJ, INFJ (Empati)", remote: "Tinggi", pop: "Sedang (Mulai Tren)" },
+            { cat: "Specialized Software", title: "CMS Developer", focus: "Spesialis platform konten. Daily Task: Membuat custom theme WordPress, konfigurasi plugin WooCommerce, dan optimasi speed website.", skills: "WordPress (PHP), Magento, Drupal", salJr: "5 - 8 Juta", salMid: "8 - 15 Juta", salSr: "15 - 25 Juta", aiRisk: "Mudah", aiReason: "Setup template dan modifikasi dasar sangat cepat dilakukan AI.", diff: "Rendah", mbti: "ISFP, ESFP (Praktis)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Specialized Software", title: "Release Engineer", focus: "Mengatur versi dan peluncuran software. Daily Task: Mengelola branch Git, membuat script deployment, dan memastikan rollback plan jika rilis gagal.", skills: "Version Control (Git), Branching strategy", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Mudah", aiReason: "Proses rilis sangat terstruktur dan mudah diotomasi skrip/AI.", diff: "Sedang", mbti: "ISTJ, ESTJ (Teratur)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Specialized Software", title: "Mainframe Developer", focus: "Sistem perbankan tua (Legacy) namun vital. Daily Task: Maintenance kode COBOL 30 tahun lalu untuk sistem transaksi bank core agar tetap berjalan.", skills: "COBOL, JCL, DB2, z/OS", salJr: "10 - 15 Juta", salMid: "15 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI membantu menerjemahkan kode kuno, tapi logika legacy sangat spesifik.", diff: "Sedang (Legacy Skill)", mbti: "ISTJ, ISTP (Konsisten)", remote: "Sedang (Hybrid)", pop: "Berpotensi Rendah" },
+            { cat: "Specialized Data", title: "Analytics Engineer", focus: "Jembatan Data Analyst & Engineer (sangat tren). Daily Task: Membersihkan data mentah di Snowflake menggunakan dbt agar siap dipakai tim bisnis.", skills: "dbt (data build tool), SQL, BigQuery/Snowflake", salJr: "10 - 15 Juta", salMid: "15 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "SQL/dbt code bisa di-generate, tapi struktur data butuh konteks bisnis.", diff: "Sedang", mbti: "INTP, ISTJ (Logis)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Specialized Data", title: "AI Ethicist", focus: "Memastikan AI tidak bias/berbahaya. Daily Task: Mengaudit dataset pelatihan untuk mencari bias gender/ras dan membuat guideline etika AI perusahaan.", skills: "Ethics, Law, Sociology, Tech understanding", salJr: "10 - 15 Juta", salMid: "15 - 30 Juta", salSr: "30 - 50 Juta", aiRisk: "Sulit", aiReason: "Masalah moral, bias budaya, dan etika butuh pertimbangan filosofis manusia.", diff: "Tinggi (Filosofis)", mbti: "INFJ, INTP (Pemikir)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Specialized Data", title: "GIS Developer", focus: "Data Geospasial (Peta & Lokasi). Daily Task: Memvisualisasikan data persebaran penduduk di peta interaktif menggunakan Leaflet.js dan PostGIS.", skills: "ArcGIS, QGIS, PostGIS, GeoJSON", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Analisis spasial dibantu AI, interpretasi lokasi butuh konteks lapangan.", diff: "Sedang", mbti: "ISTP, INTP (Spasial)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Specialized Data", title: "Bioinformatics Scientist", focus: "Biologi + Data (DNA sequencing). Daily Task: Menganalisis urutan DNA menggunakan algoritma Python untuk mencari mutasi genetik penyakit.", skills: "Python, R, Biology knowledge", salJr: "10 - 15 Juta", salMid: "15 - 28 Juta", salSr: "28 - 50 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI mempercepat penemuan pola genetik, riset butuh hipotesis ilmuwan.", diff: "Sangat Tinggi (S2/S3)", mbti: "INTP, INTJ (Peneliti)", remote: "Sedang (Lab Data)", pop: "Berpotensi Tinggi" },
+            { cat: "Specialized Data", title: "Data Steward", focus: "Tata kelola dan kualitas data (Governance). Daily Task: Membuat katalog data perusahaan, menetapkan siapa pemilik data, dan memastikan kepatuhan privasi.", skills: "Data Governance, Compliance, Cataloging", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Klasifikasi data otomatis, tapi kebijakan (governance) wewenang manusia.", diff: "Sedang", mbti: "ISTJ, ISFJ (Tertib)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Network & Telecom", title: "NOC (Network Ops Center) Eng.", focus: "Monitoring jaringan fisik 24/7. Daily Task: Memantau layar dashboard monitoring, merestart router jika down, dan eskalasi tiket gangguan.", skills: "Monitoring tools (SolarWinds), Troubleshooting", salJr: "5 - 8 Juta", salMid: "8 - 12 Juta", salSr: "12 - 20 Juta", aiRisk: "Mudah", aiReason: "Monitoring dan alerting dasar sudah banyak digantikan AI (AIOps).", diff: "Rendah", mbti: "ISTP, ESTP (Siaga)", remote: "Rendah (On-site)", pop: "Sedang" },
+            { cat: "Network & Telecom", title: "VoIP Engineer", focus: "Teknologi suara via internet. Daily Task: Konfigurasi server Asterisk/PBX untuk call center dan troubleshooting delay suara saat telepon.", skills: "SIP, RTP, PBX Systems, Asterisk", salJr: "7 - 10 Juta", salMid: "10 - 18 Juta", salSr: "18 - 30 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Konfigurasi bisa otomatis, troubleshooting kualitas suara kadang butuh telinga.", diff: "Sedang", mbti: "ISTP, ESTP (Teknis)", remote: "Sedang (Hybrid)", pop: "Berpotensi Rendah" },
+            { cat: "Network & Telecom", title: "Telecommunications Eng.", focus: "Infrastruktur sinyal (4G/5G, Fiber Optic). Daily Task: Merencanakan penempatan menara BTS baru dan optimasi frekuensi sinyal radio.", skills: "RF Engineering, Signal Processing", salJr: "7 - 10 Juta", salMid: "10 - 18 Juta", salSr: "18 - 30 Juta", aiRisk: "Sulit", aiReason: "Melibatkan infrastruktur fisik dan sinyal di dunia nyata.", diff: "Tinggi", mbti: "ISTP, ESTJ (Fisik)", remote: "Rendah (Lapangan)", pop: "Sedang" },
+            { cat: "Software & Web", title: "Frontend Developer", focus: "Tampilan & interaksi user di web. Daily Task: Mengubah desain Figma menjadi kode React, memastikan responsif di HP, dan fetch data dari API.", skills: "React, Vue, CSS, JavaScript", salJr: "6 - 10 Juta", salMid: "10 - 18 Juta", salSr: "18 - 35 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI generate UI code (React/Vue) cepat, manusia fokus ke logika interaksi.", diff: "Rendah - Sedang", mbti: "INFP, ISFP, INTP (Visual)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Software & Web", title: "Backend Developer", focus: "Logika server, database, API. Daily Task: Membuat REST API dengan Node.js/Python, merancang skema database, dan optimasi query lambat.", skills: "Python, Java, Node.js, SQL", salJr: "8 - 12 Juta", salMid: "12 - 22 Juta", salSr: "22 - 40 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "API/Database query mudah bagi AI, arsitektur server tetap butuh manusia.", diff: "Sedang", mbti: "INTP, ISTJ, INTJ (Logika)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Software & Web", title: "Full-Stack Developer", focus: "Menguasai frontend & backend. Daily Task: Membangun fitur login dari UI (React) sampai database (Postgres), deployment full app.", skills: "MERN Stack, Next.js, Django", salJr: "9 - 14 Juta", salMid: "14 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI meningkatkan produktivitas drastis (2x-5x), mengurangi kebutuhan junior.", diff: "Sedang - Tinggi", mbti: "INTP, ENTP (Generalis)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Software & Web", title: "Mobile App Dev", focus: "Aplikasi HP (iOS/Android). Daily Task: Coding fitur aplikasi menggunakan Flutter/Swift, testing di berbagai ukuran layar HP, dan rilis ke PlayStore.", skills: "Swift, Kotlin, Flutter, React Native", salJr: "8 - 13 Juta", salMid: "13 - 22 Juta", salSr: "22 - 40 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Boilerplate code mudah, optimalisasi performa HP butuh skill.", diff: "Sedang", mbti: "ISTP, ISFP (Maker)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Software & Web", title: "Web Developer", focus: "Pembuatan website umum. Daily Task: Membuat landing page profil perusahaan menggunakan HTML/CSS/JS atau Webflow.", skills: "HTML, PHP, CMS (WordPress)", salJr: "5 - 9 Juta", salMid: "9 - 15 Juta", salSr: "15 - 25 Juta", aiRisk: "Mudah", aiReason: "Website standar (profil/landing page) bisa dibuat AI dalam hitungan detik.", diff: "Rendah", mbti: "ISFP, ESFP (Praktis)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Software & Web", title: "Game Developer", focus: "Mekanika permainan video. Daily Task: Scripting pergerakan karakter di Unity (C#), mengatur fisika tabrakan, dan debugging glitch game.", skills: "C++, C#, Unity, Unreal Engine", salJr: "6 - 10 Juta", salMid: "10 - 18 Juta", salSr: "18 - 30 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI bantu coding, tapi 'rasa' fun dalam gameplay butuh intuisi manusia.", diff: "Sedang", mbti: "INTP, ISTP (Problem Solver)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Software & Web", title: "AR/VR Developer", focus: "Realitas virtual/augmented. Daily Task: Membuat aplikasi training VR menggunakan Unity, integrasi sensor headset, dan optimasi render 3D.", skills: "Unity 3D, ARKit, C#", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Generasi objek 3D mudah, interaksi spasial butuh desain manusia.", diff: "Sedang", mbti: "ENTP, INFP (Imaginatif)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Software & Web", title: "DevOps Engineer", focus: "Integrasi kode & operasi server. Daily Task: Menulis script Dockerfile, setup pipeline CI/CD otomatis, dan monitoring server cloud.", skills: "Docker, Jenkins, CI/CD", salJr: "10 - 15 Juta", salMid: "15 - 28 Juta", salSr: "28 - 50 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Script IaC (Terraform) mudah di-generate, desain pipeline butuh logika.", diff: "Tinggi", mbti: "INTJ, ISTJ, INTP (Sistem)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Software & Web", title: "QA Engineer", focus: "Jaminan kualitas software. Daily Task: Mencoba semua fitur aplikasi untuk mencari bug, menulis laporan bug di Jira, dan re-test setelah fix.", skills: "Manual Testing, Jira", salJr: "5 - 8 Juta", salMid: "8 - 14 Juta", salSr: "14 - 22 Juta", aiRisk: "Mudah", aiReason: "Pembuatan test case dan skenario testing sangat mudah bagi AI.", diff: "Rendah - Sedang", mbti: "ISTJ, ISFJ (Teliti)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Software & Web", title: "Automation Tester", focus: "Tes otomatis via script. Daily Task: Menulis script Selenium/Cypress yang otomatis login dan klik tombol untuk cek error.", skills: "Selenium, Appium, Python", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Mudah", aiReason: "Script testing (Selenium/Appium) sangat cepat dibuat AI.", diff: "Sedang", mbti: "INTP, ISTJ (Efisien)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Software & Web", title: "Software Architect", focus: "Desain struktur sistem level tinggi. Daily Task: Menggambar diagram arsitektur microservices, memilih teknologi yang dipakai, dan review desain tim.", skills: "System Design, Microservices", salJr: "30 - 45 Juta", salMid: "45 - 70 Juta", salSr: "70 - 100 Juta+", aiRisk: "Sulit", aiReason: "Memahami batasan bisnis, biaya, dan skala jangka panjang.", diff: "Sangat Tinggi", mbti: "INTJ, INTP (Abstrak)", remote: "Tinggi", pop: "Sedang (Level Senior)" },
+            { cat: "Software & Web", title: "Embedded Engineer", focus: "Software di perangkat keras. Daily Task: Coding C++ untuk mikrokontroler mesin cuci atau otomotif agar merespons sensor.", skills: "C, C++, Assembly, Microcontrollers", salJr: "9 - 13 Juta", salMid: "13 - 22 Juta", salSr: "22 - 40 Juta", aiRisk: "Sulit", aiReason: "Ketergantungan tinggi pada hardware fisik yang spesifik/unik.", diff: "Tinggi", mbti: "ISTP, INTP (Hardware)", remote: "Rendah (Lab)", pop: "Sedang" },
+            { cat: "Software & Web", title: "Firmware Engineer", focus: "Software level rendah (BIOS/Driver). Daily Task: Menulis driver agar OS bisa mengenali hardware baru, debugging level register memori.", skills: "C, RTOS, Hardware debuggers", salJr: "9 - 14 Juta", salMid: "14 - 24 Juta", salSr: "24 - 45 Juta", aiRisk: "Sulit", aiReason: "Debugging level rendah pada hardware sulit dilakukan AI tanpa akses fisik.", diff: "Tinggi", mbti: "ISTP, INTJ (Low Level)", remote: "Rendah (Lab)", pop: "Sedang" },
+            { cat: "Software & Web", title: "API Engineer", focus: "Pengembangan antarmuka program. Daily Task: Merancang spesifikasi API (Swagger), coding endpoint backend, dan optimasi response time.", skills: "REST, GraphQL, Swagger", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Mudah", aiReason: "Dokumentasi dan boilerplate API sangat mudah diotomasi.", diff: "Sedang", mbti: "INTP, ISTJ (Struktur)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Software & Web", title: "Cloud Developer", focus: "Aplikasi native di cloud. Daily Task: Menulis fungsi AWS Lambda (Serverless), setup API Gateway, dan koneksi ke DynamoDB.", skills: "AWS SDK, Serverless (Lambda)", salJr: "10 - 15 Juta", salMid: "15 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Fungsi serverless mudah dibuat, orkestrasi sistem butuh manusia.", diff: "Sedang", mbti: "INTP, ENTP (Modern)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Software & Web", title: "SRE (Site Reliability)", focus: "Stabilitas & skalabilitas sistem. Daily Task: Menangani insiden server down tengah malam, analisa post-mortem, dan membuat sistem auto-healing.", skills: "Linux, Cloud monitoring, Scripting", salJr: "12 - 18 Juta", salMid: "18 - 32 Juta", salSr: "32 - 60 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI deteksi anomali trafik, manusia menangani insiden kritis tak terduga.", diff: "Tinggi", mbti: "ISTP, INTP (Tenang)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Software & Web", title: "Platform Engineer", focus: "Membangun tool internal untuk dev. Daily Task: Membuat portal self-service agar developer bisa spin-up server sendiri tanpa tiket support.", skills: "Kubernetes, Terraform, Golang", salJr: "12 - 18 Juta", salMid: "18 - 30 Juta", salSr: "30 - 55 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Membangun tools internal, AI membantu mempercepat scripting.", diff: "Tinggi", mbti: "INTJ, INTP (Skala)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Data & AI", title: "Data Analyst", focus: "Analisis data historis. Daily Task: Membuat dashboard penjualan bulanan di Tableau/PowerBI dan query SQL untuk mencari tren customer.", skills: "Excel, SQL, Tableau, PowerBI", salJr: "7 - 11 Juta", salMid: "11 - 18 Juta", salSr: "18 - 30 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI jago query SQL/Visualisasi, manusia memberi konteks 'mengapa' data begitu.", diff: "Rendah - Sedang", mbti: "ISTJ, INTP (Fakta)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Data & AI", title: "Data Scientist", focus: "Prediksi & model statistik. Daily Task: Eksplorasi data di Jupyter Notebook, training model regresi untuk prediksi churn user, validasi akurasi.", skills: "Python, R, Statistics, Pandas", salJr: "10 - 16 Juta", salMid: "16 - 30 Juta", salSr: "30 - 60 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Pemilihan model dibantu AutoML, interpretasi hasil butuh ilmuwan.", diff: "Tinggi (Math Heavy)", mbti: "INTP, INTJ (Analisis)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Data & AI", title: "Data Engineer", focus: "Infrastruktur & pipanisasi data. Daily Task: Membuat pipeline ETL (Extract-Transform-Load) agar data dari aplikasi masuk rapi ke Data Warehouse.", skills: "SQL, Hadoop, Spark, Kafka", salJr: "10 - 15 Juta", salMid: "15 - 28 Juta", salSr: "28 - 50 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Pipeline ETL rutin mudah diotomasi, desain warehouse butuh arsitek.", diff: "Sedang", mbti: "ISTJ, INTJ (Pipeline)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Data & AI", title: "ML Engineer", focus: "Implementasi model Machine Learning. Daily Task: Mengubah model eksperimen Data Scientist menjadi API production yang cepat dan scalable.", skills: "TensorFlow, PyTorch, Scikit-learn", salJr: "12 - 18 Juta", salMid: "18 - 35 Juta", salSr: "35 - 65 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Tuning parameter dibantu AI, penerapan ke produk butuh insinyur.", diff: "Tinggi", mbti: "INTP, INTJ (Algoritma)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Data & AI", title: "AI Engineer", focus: "Integrasi AI ke produk. Daily Task: Menggunakan API OpenAI/Claude untuk fitur chatbot di aplikasi, mengatur prompt, dan handling error.", skills: "OpenAI API, Hugging Face, Python", salJr: "12 - 20 Juta", salMid: "20 - 35 Juta", salSr: "35 - 70 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Merakit API AI itu mudah, memastikan akurasi dan keamanan itu sulit.", diff: "Tinggi", mbti: "INTP, ENTP (Inovasi)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Data & AI", title: "Deep Learning Eng.", focus: "Jaringan syaraf tiruan (Neural Network). Daily Task: Riset arsitektur model baru untuk pengenalan suara atau gambar yang lebih akurat.", skills: "CNNs, RNNs, Deep Math", salJr: "15 - 22 Juta", salMid: "22 - 40 Juta", salSr: "40 - 75 Juta", aiRisk: "Sulit", aiReason: "Riset arsitektur neural network baru butuh pemahaman matematika mendalam.", diff: "Sangat Tinggi", mbti: "INTP, INTJ (Teori)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Data & AI", title: "MLOps Engineer", focus: "Operasionalisasi model ML (Deployment). Daily Task: Memastikan model ML di production tidak 'basi' (drift), setup monitoring akurasi otomatis.", skills: "Kubeflow, MLflow, Docker", salJr: "12 - 18 Juta", salMid: "18 - 30 Juta", salSr: "30 - 60 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Monitoring drift model otomatis, maintenance infrastruktur butuh manusia.", diff: "Tinggi", mbti: "ISTJ, ESTJ (Operasi)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Data & AI", title: "NLP Engineer", focus: "Pemrosesan bahasa manusia. Daily Task: Melatih model agar bisa memahami sentimen bahasa Indonesia gaul atau dialek lokal.", skills: "NLTK, Spacy, Transformers", salJr: "12 - 18 Juta", salMid: "18 - 30 Juta", salSr: "30 - 60 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Sangat terbantu LLM, manusia fokus pada fine-tuning data spesifik.", diff: "Tinggi", mbti: "INTP, INFJ (Bahasa)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Data & AI", title: "Computer Vision Eng.", focus: "Analisis gambar/video. Daily Task: Membuat sistem absensi wajah atau deteksi plat nomor kendaraan otomatis.", skills: "OpenCV, Image Processing", salJr: "12 - 18 Juta", salMid: "18 - 30 Juta", salSr: "30 - 60 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Labeling data otomatis, manusia validasi kasus edge case.", diff: "Tinggi", mbti: "ISTP, INTP (Pola)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Data & AI", title: "Prompt Engineer", focus: "Optimalisasi input AI Generatif. Daily Task: Mencoba berbagai variasi kalimat perintah ke ChatGPT agar menghasilkan output kode yang konsisten.", skills: "LLM logic, Context structuring", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 40 Juta", aiRisk: "Mudah", aiReason: "Semakin pintar model AI, semakin tidak butuh prompt engineer khusus.", diff: "Rendah (Skill Baru)", mbti: "ENFP, INTP (Bahasa)", remote: "Tinggi", pop: "Sedang (Tren Sesaat?)" },
+            { cat: "Data & AI", title: "BI Analyst", focus: "Intelijen bisnis & reporting. Daily Task: Rapat dengan manajer marketing, menerjemahkan kebutuhan mereka menjadi dashboard visual.", skills: "PowerBI, SQL, Business logic", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Dashboard otomatis, insight bisnis strategis butuh manusia.", diff: "Sedang", mbti: "ESTJ, ENTJ (Bisnis)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Data & AI", title: "Data Architect", focus: "Desain struktur database perusahaan. Daily Task: Merancang blueprint aliran data dari aplikasi ke gudang data agar efisien dan aman.", skills: "Data Modeling, Warehousing", salJr: "25 - 35 Juta", salMid: "35 - 55 Juta", salSr: "55 - 80 Juta", aiRisk: "Sulit", aiReason: "Desain jangka panjang aliran data perusahaan yang kompleks.", diff: "Sangat Tinggi", mbti: "INTJ, ISTJ (Rancang)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Data & AI", title: "Research Scientist AI", focus: "Penemuan algoritma baru. Daily Task: Membaca paper akademik terbaru, bereksperimen matematika untuk menemukan metode AI baru.", skills: "Ph.D level Math, Academic Research", salJr: "20 - 30 Juta", salMid: "30 - 60 Juta", salSr: "60 - 100 Juta+", aiRisk: "Sulit", aiReason: "Menemukan hal baru yang belum ada di data latihan AI.", diff: "Sangat Tinggi (PhD)", mbti: "INTP, INTJ (Akademis)", remote: "Tinggi", pop: "Rendah (Sangat Akademis)" },
+            { cat: "Data & AI", title: "Big Data Engineer", focus: "Mengolah data skala masif. Daily Task: Mengelola cluster Hadoop/Spark untuk memproses terabytes data log transaksi harian.", skills: "NoSQL, Hadoop Ecosystem", salJr: "12 - 18 Juta", salMid: "18 - 30 Juta", salSr: "30 - 60 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Optimasi query dibantu AI, manajemen cluster butuh spesialis.", diff: "Tinggi", mbti: "INTJ, ISTJ (Masif)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Cybersecurity", title: "Cybersecurity Analyst", focus: "Monitor & deteksi ancaman. Daily Task: Memantau alert di layar SIEM, membedakan serangan asli vs false alarm, blokir IP penyerang.", skills: "SIEM tools, Firewall logs", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI filter ribuan alert (noise), manusia investigasi ancaman nyata.", diff: "Sedang", mbti: "ISTJ, INTJ (Waspada)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Cybersecurity", title: "Pentester", focus: "Meretas sistem sendiri (legal). Daily Task: Mencoba membobol website klien (atas izin) menggunakan teknik hacking untuk mencari celah keamanan.", skills: "Kali Linux, Metasploit, Burp Suite", salJr: "10 - 15 Juta", salMid: "15 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI bisa scan celah umum, logika serangan kreatif butuh hacker manusia.", diff: "Sedang - Tinggi", mbti: "ENTP, ISTP, INTP (Hacker)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Cybersecurity", title: "Ethical Hacker", focus: "Hacking untuk tujuan keamanan. Daily Task: Riset celah keamanan baru (Zero Day), simulasi serangan siber terencana.", skills: "Network scanning, Scripting", salJr: "10 - 15 Juta", salMid: "15 - 28 Juta", salSr: "28 - 50 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Sama seperti pentester, kreativitas serangan sulit ditiru AI.", diff: "Sedang - Tinggi", mbti: "ENTP, INTP (Kreatif)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Cybersecurity", title: "Security Engineer", focus: "Membangun sistem pertahanan. Daily Task: Konfigurasi Firewall perusahaan, pasang VPN aman untuk karyawan remote.", skills: "Firewalls, IDS/IPS, VPN", salJr: "10 - 16 Juta", salMid: "16 - 28 Juta", salSr: "28 - 55 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Konfigurasi firewall otomatis, desain pertahanan butuh strategi.", diff: "Tinggi", mbti: "ISTJ, ESTJ (Protektif)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Cybersecurity", title: "Security Architect", focus: "Desain keamanan level organisasi. Daily Task: Membuat kebijakan keamanan IT global, memastikan perusahaan patuh standar ISO 27001.", skills: "ISO 27001, Zero Trust Architecture", salJr: "25 - 35 Juta", salMid: "35 - 60 Juta", salSr: "60 - 90 Juta", aiRisk: "Sulit", aiReason: "Melihat gambaran besar risiko bisnis dan kepatuhan hukum.", diff: "Sangat Tinggi", mbti: "INTJ, ENTJ (Strategi)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Cybersecurity", title: "SOC Analyst", focus: "Operasi pusat keamanan 24/7. Daily Task: Shift jaga memantau dashboard keamanan, respon cepat jika ada insiden virus/hacking.", skills: "Splunk, Incident Response", salJr: "7 - 10 Juta", salMid: "10 - 18 Juta", salSr: "18 - 28 Juta", aiRisk: "Mudah", aiReason: "Analisis Level 1 (triaging) sangat mudah digantikan otomatisasi.", diff: "Rendah - Sedang", mbti: "ISTJ, ISFJ (Monitor)", remote: "Sedang (Shift)", pop: "Tinggi" },
+            { cat: "Cybersecurity", title: "Digital Forensics", focus: "Investigasi jejak kejahatan digital. Daily Task: Meng-copy harddisk barang bukti sitaan, recover file yang dihapus penjahat.", skills: "EnCase, Disk imaging", salJr: "10 - 15 Juta", salMid: "15 - 25 Juta", salSr: "25 - 40 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI memproses data bukti, manusia menyimpulkan untuk keperluan hukum.", diff: "Sedang", mbti: "ISTJ, INTP (Investigasi)", remote: "Sedang (Lab)", pop: "Rendah (Pemerintahan/Hukum)" },
+            { cat: "Cybersecurity", title: "Malware Analyst", focus: "Membedah virus/malware. Daily Task: Membongkar kode virus di lingkungan terisolasi (sandbox) untuk melihat cara kerjanya.", skills: "Reverse Engineering, Assembly", salJr: "12 - 18 Juta", salMid: "18 - 30 Juta", salSr: "30 - 50 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Deobfuscation code dibantu AI, pemahaman perilaku virus butuh ahli.", diff: "Tinggi", mbti: "INTP, ISTP (Bedah)", remote: "Tinggi", pop: "Rendah (Sangat Spesifik)" },
+            { cat: "Cybersecurity", title: "Network Sec. Analyst", focus: "Keamanan jaringan spesifik. Daily Task: Analisis paket data jaringan via Wireshark untuk mencari penyusup.", skills: "Wireshark, TCP/IP deep dive", salJr: "8 - 13 Juta", salMid: "13 - 22 Juta", salSr: "22 - 38 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Deteksi pola trafik aneh dibantu AI.", diff: "Sedang", mbti: "ISTJ (Pola)", remote: "Sedang (Hybrid)", pop: "Sedang" },
+            { cat: "Cybersecurity", title: "App. Sec. Engineer", focus: "Keamanan kode aplikasi. Daily Task: Review kode programmer lain untuk cari celah SQL Injection sebelum rilis.", skills: "SAST/DAST tools, Secure Coding", salJr: "12 - 18 Juta", salMid: "18 - 30 Juta", salSr: "30 - 60 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Code review keamanan otomatis (SAST), validasi logika manusia.", diff: "Tinggi", mbti: "INTP, ISTJ (Detail)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Cybersecurity", title: "Cloud Sec. Specialist", focus: "Keamanan platform cloud. Daily Task: Setting permission user AWS (IAM) agar tidak sembarangan akses server.", skills: "AWS/Azure Security Guardrails", salJr: "15 - 20 Juta", salMid: "20 - 35 Juta", salSr: "35 - 70 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Policy enforcement otomatis, desain arsitektur aman manual.", diff: "Tinggi", mbti: "INTJ, ESTJ (Compliance)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Cybersecurity", title: "Cryptographer", focus: "Enkripsi & matematika sandi. Daily Task: Merancang algoritma enkripsi baru yang tahan terhadap komputer kuantum.", skills: "Advanced Math, Algorithm design", salJr: "15 - 25 Juta", salMid: "25 - 45 Juta", salSr: "45 - 80 Juta", aiRisk: "Sulit", aiReason: "Matematika tingkat tinggi dan inovasi enkripsi baru.", diff: "Sangat Tinggi (Math)", mbti: "INTP, INTJ (Murni)", remote: "Tinggi", pop: "Rendah (Sangat Langka)" },
+            { cat: "Cybersecurity", title: "Threat Intel Analyst", focus: "Riset tren serangan siber global. Daily Task: Monitoring forum dark web untuk melihat apakah ada data perusahaan yang bocor.", skills: "OSINT, Dark web monitoring", salJr: "10 - 15 Juta", salMid: "15 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI kumpulkan data dark web, manusia hubungkan titik-titik intelijen.", diff: "Sedang", mbti: "INTP, INTJ (Riset)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Cloud & Infrastructure", title: "Cloud Architect", focus: "Desain solusi cloud. Daily Task: Menggambar diagram arsitektur sistem cloud yang hemat biaya dan high-availability.", skills: "AWS/Azure Solutions Architect cert", salJr: "25 - 35 Juta", salMid: "35 - 60 Juta", salSr: "60 - 90 Juta", aiRisk: "Sulit", aiReason: "Desain solusi yang hemat biaya dan sesuai kebutuhan bisnis unik.", diff: "Sangat Tinggi", mbti: "ENTJ, INTJ (Big Picture)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Cloud & Infrastructure", title: "Cloud Administrator", focus: "Manajemen harian cloud. Daily Task: Membuat user baru, restart instance server, dan cek tagihan cloud bulanan.", skills: "Cloud Console management", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Mudah", aiReason: "Banyak tugas admin rutin sudah diotomasi oleh Cloud Provider.", diff: "Sedang", mbti: "ISTJ, ISFJ (Rutin)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Cloud & Infrastructure", title: "Cloud Sec. Engineer", focus: "Keamanan spesifik cloud. Daily Task: Memastikan bucket penyimpanan data (S3) tidak publik dan terenkripsi.", skills: "IAM, VPC configuration", salJr: "12 - 18 Juta", salMid: "18 - 30 Juta", salSr: "30 - 60 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Monitoring otomatis, respon insiden butuh manusia.", diff: "Tinggi", mbti: "ISTJ, ESTJ (Jaga)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Cloud & Infrastructure", title: "Network Engineer", focus: "Konektivitas fisik/virtual. Daily Task: Setting router Cisco, tarik kabel LAN di data center, config VLAN kantor.", skills: "Cisco, Juniper, Routing/Switching", salJr: "6 - 10 Juta", salMid: "10 - 18 Juta", salSr: "18 - 30 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Software Defined Network (SDN) pake AI, tapi fisik (kabel) butuh orang.", diff: "Sedang", mbti: "ISTP, ESTJ (Koneksi)", remote: "Sedang (Hybrid)", pop: "Sedang" },
+            { cat: "Cloud & Infrastructure", title: "Systems Administrator", focus: "Manajemen server & OS. Daily Task: Install update Windows/Linux server, backup data, manajemen user AD.", skills: "Linux/Windows Admin, Bash/Powershell", salJr: "6 - 10 Juta", salMid: "10 - 18 Juta", salSr: "18 - 28 Juta", aiRisk: "Mudah", aiReason: "Maintenance server rutin (patching/backup) mudah diotomasi.", diff: "Sedang", mbti: "ISTJ, ISTP (Ops)", remote: "Sedang (Hybrid)", pop: "Berpotensi Rendah" },
+            { cat: "Cloud & Infrastructure", title: "Infrastructure Eng.", focus: "Perawatan hardware/data center. Daily Task: Memasang server fisik ke rak, mengganti harddisk rusak, rapikan kabel.", skills: "Rack mounting, Cabling, Virtualization", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sulit", aiReason: "Masih banyak melibatkan hardware fisik di data center.", diff: "Sedang", mbti: "ISTP, ESTJ (Fisik)", remote: "Rendah (Data Center)", pop: "Sedang" },
+            { cat: "Cloud & Infrastructure", title: "Database Admin (DBA)", focus: "Performa & backup database. Daily Task: Tuning query SQL yang lambat, restore database dari backup saat error.", skills: "Oracle, PostgreSQL, MySQL tuning", salJr: "8 - 13 Juta", salMid: "13 - 22 Juta", salSr: "22 - 40 Juta", aiRisk: "Mudah", aiReason: "Cloud DB sekarang punya fitur 'Self-Driving' / Auto-tuning.", diff: "Sedang", mbti: "ISTJ, ISFJ (Data)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Cloud & Infrastructure", title: "Virtualization Eng.", focus: "Mesin virtual & Hypervisor. Daily Task: Membuat 50 VM baru untuk tim dev, manajemen resource CPU/RAM host.", skills: "VMware, Hyper-V, Citrix", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Mudah", aiReason: "Manajemen VM sangat terkomputerisasi.", diff: "Sedang", mbti: "ISTP, INTP (Server)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Cloud & Infrastructure", title: "Storage Engineer", focus: "Manajemen penyimpanan data (SAN/NAS). Daily Task: Mengalokasikan space storage (LUN) ke server, monitoring kesehatan harddisk.", skills: "NetApp, EMC, Storage arrays", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Prediksi kapasitas (forecasting) dibantu AI.", diff: "Sedang", mbti: "ISTJ (Arsip)", remote: "Sedang (Hybrid)", pop: "Sedang" },
+            { cat: "Cloud & Infrastructure", title: "Kubernetes Engineer", focus: "Orkestrasi container. Daily Task: Menulis file YAML konfigurasi pod, troubleshooting kenapa pod crash.", skills: "Kubernetes (K8s), Helm charts", salJr: "12 - 18 Juta", salMid: "18 - 30 Juta", salSr: "30 - 60 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Config YAML di-generate AI, troubleshooting cluster crash butuh ahli.", diff: "Tinggi", mbti: "INTP, INTJ (Kompleks)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Cloud & Infrastructure", title: "Linux Administrator", focus: "Spesialis OS Linux. Daily Task: Menggunakan terminal command line seharian untuk config server Linux.", skills: "RedHat, Ubuntu, Kernel tuning", salJr: "7 - 11 Juta", salMid: "11 - 18 Juta", salSr: "18 - 30 Juta", aiRisk: "Mudah", aiReason: "Scripting bash/shell sangat mudah bagi AI.", diff: "Sedang", mbti: "ISTP, INTP (Terminal)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Product & Design", title: "UI Designer", focus: "Visual antarmuka (tombol, warna). Daily Task: Menggambar tombol, memilih palet warna, dan layout halaman di Figma.", skills: "Figma, Adobe XD, Sketch", salJr: "6 - 10 Juta", salMid: "10 - 16 Juta", salSr: "16 - 25 Juta", aiRisk: "Mudah", aiReason: "Generasi layout standar/komponen visual sangat cepat dengan AI.", diff: "Rendah - Sedang", mbti: "ISFP, INFP (Estetika)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Product & Design", title: "UX Designer", focus: "Alur & kenyamanan pengguna. Daily Task: Membuat wireframe kasar (low-fi) untuk menentukan alur klik pengguna.", skills: "Wireframing, User Flows", salJr: "7 - 11 Juta", salMid: "11 - 18 Juta", salSr: "18 - 30 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI belum bisa sepenuhnya mengerti empati dan rasa frustrasi user.", diff: "Sedang", mbti: "INFJ, ENFJ (Empati)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Product & Design", title: "Product Designer", focus: "Gabungan UI/UX & strategi bisnis. Daily Task: Mendesain fitur produk end-to-end dengan mempertimbangkan tujuan bisnis.", skills: "Design Systems, Prototyping", salJr: "8 - 13 Juta", salMid: "13 - 22 Juta", salSr: "22 - 40 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Ideasi dibantu AI, keputusan final berdasar visi produk.", diff: "Sedang", mbti: "ENFP, INTP (Solusi)", remote: "Tinggi", pop: "Tinggi" },
+            { cat: "Product & Design", title: "UI/UX Researcher", focus: "Riset perilaku pengguna. Daily Task: Mewawancarai 5 user, merekam layar mereka saat pakai aplikasi, buat laporan.", skills: "User Interview, Usability Testing", salJr: "7 - 11 Juta", salMid: "11 - 18 Juta", salSr: "18 - 32 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI rangkum data interview, manusia yang melakukan wawancara mendalam.", diff: "Sedang", mbti: "INFJ, ENFP (Psikologi)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Product & Design", title: "Interaction Designer", focus: "Animasi & respons antarmuka. Daily Task: Membuat animasi loading yang halus atau transisi halaman.", skills: "Principle, After Effects", salJr: "7 - 11 Juta", salMid: "11 - 18 Juta", salSr: "18 - 28 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Animasi standar mudah, interaksi mikro unik butuh kreativitas.", diff: "Sedang", mbti: "ISFP, INTP (Gerak)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Product & Design", title: "Service Designer", focus: "Desain layanan end-to-end. Daily Task: Memetakan perjalanan customer dari lihat iklan sampai komplain ke CS.", skills: "Blueprinting, Customer Journey", salJr: "9 - 14 Juta", salMid: "14 - 22 Juta", salSr: "22 - 40 Juta", aiRisk: "Sulit", aiReason: "Melibatkan proses dunia nyata dan interaksi antar manusia.", diff: "Tinggi", mbti: "ENFJ, ENTJ (Holistik)", remote: "Sedang (Hybrid)", pop: "Sedang" },
+            { cat: "Product & Design", title: "Game Designer", focus: "Konsep & aturan game. Daily Task: Menulis dokumen aturan main (GDD), merancang level 1 sampai 10 agar makin susah.", skills: "Level design, Game balancing", salJr: "6 - 10 Juta", salMid: "10 - 18 Juta", salSr: "18 - 30 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Balancing level game dibantu simulasi AI, konsep kreatif manusia.", diff: "Sedang", mbti: "ENTP, INTP (Konsep)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Product & Design", title: "3D Artist (Tech)", focus: "Aset 3D untuk app/game. Daily Task: Sculpting karakter monster di ZBrush, lalu texturing agar terlihat nyata.", skills: "Blender, Maya, ZBrush", salJr: "6 - 10 Juta", salMid: "10 - 18 Juta", salSr: "18 - 28 Juta", aiRisk: "Mudah", aiReason: "Generasi aset 3D tekstur/model semakin instan dengan AI.", diff: "Sedang", mbti: "ISTP, ISFP (Visual)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Product & Design", title: "Motion Designer", focus: "Grafis bergerak. Daily Task: Membuat video explainer animasi untuk iklan youtube perusahaan.", skills: "After Effects, Cinema 4D", salJr: "6 - 10 Juta", salMid: "10 - 18 Juta", salSr: "18 - 25 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Keyframe otomatis, art direction tetap manusia.", diff: "Sedang", mbti: "ISFP (Dinamis)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Product & Design", title: "Product Manager", focus: "Strategi & roadmap produk. Daily Task: Menentukan fitur apa yang harus dibuat bulan depan berdasarkan data dan request user.", skills: "Agile, Jira, Strategic planning", salJr: "10 - 15 Juta", salMid: "15 - 28 Juta", salSr: "28 - 50 Juta", aiRisk: "Sulit", aiReason: "Negosiasi stakeholder, intuisi pasar, dan kepemimpinan.", diff: "Tinggi", mbti: "ENTJ, ENFJ (Generalis)", remote: "Sedang (Hybrid)", pop: "Tinggi" },
+            { cat: "Product & Design", title: "Product Owner", focus: "Backlog & prioritas tim (Scrum). Daily Task: Menulis detail 'User Story' tiket kerja agar programmer paham apa yang harus dibuat.", skills: "Scrum framework, Stakeholder mgmt", salJr: "10 - 16 Juta", salMid: "16 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Menulis User Story/Acceptance Criteria sangat mudah bagi AI.", diff: "Sedang", mbti: "ESTJ, ESFJ (Prioritas)", remote: "Sedang (Hybrid)", pop: "Tinggi" },
+            { cat: "Product & Design", title: "Technical Writer", focus: "Dokumentasi teknis. Daily Task: Menulis panduan cara menggunakan API perusahaan untuk developer luar.", skills: "Markdown, API Docs, English", salJr: "6 - 10 Juta", salMid: "10 - 16 Juta", salSr: "16 - 25 Juta", aiRisk: "Mudah", aiReason: "AI sangat jago menulis dokumentasi teknis yang terstruktur.", diff: "Rendah - Sedang", mbti: "ISTJ, INTP (Penjelas)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Hardware & Emerging Tech", title: "Hardware Engineer", focus: "Desain sirkuit & PCB. Daily Task: Menggambar jalur sirkuit elektronik di komputer, lalu menyolder prototipe fisik.", skills: "Altium, PCB Design, Electronics", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sulit", aiReason: "Fisik. Desain sirkuit bisa dibantu, tapi prototipe fisik tidak.", diff: "Tinggi", mbti: "ISTP, ESTJ (Fisik)", remote: "Rendah (Lab)", pop: "Sedang" },
+            { cat: "Hardware & Emerging Tech", title: "IoT Engineer", focus: "Internet of Things. Daily Task: Memprogram sensor suhu agar mengirim data ke server lewat Wi-Fi/MQTT.", skills: "Raspberry Pi, Arduino, MQTT", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sulit", aiReason: "Integrasi sensor fisik di lapangan.", diff: "Tinggi", mbti: "ISTP, INTP (Rakitan)", remote: "Sedang (Lab)", pop: "Berpotensi Tinggi" },
+            { cat: "Hardware & Emerging Tech", title: "Robotics Engineer", focus: "Robotika & otomasi fisik. Daily Task: Coding pergerakan lengan robot pabrik agar presisi memasang baut.", skills: "ROS (Robot OS), Mechanics", salJr: "10 - 15 Juta", salMid: "15 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sulit", aiReason: "Dunia nyata penuh ketidakpastian fisik yang sulit bagi AI.", diff: "Tinggi", mbti: "ISTP, INTP (Mekanik)", remote: "Rendah (Lab)", pop: "Berpotensi Tinggi" },
+            { cat: "Hardware & Emerging Tech", title: "Mechatronics Eng.", focus: "Gabungan mekanik & elektronik. Daily Task: Merancang sistem ban berjalan otomatis yang dikontrol sensor.", skills: "PLC, Sensors, Actuators", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sulit", aiReason: "Gabungan mekanik dan elektronik fisik.", diff: "Tinggi", mbti: "ISTP (Mesin)", remote: "Rendah (Pabrik)", pop: "Sedang" },
+            { cat: "Hardware & Emerging Tech", title: "Chip Design Eng.", focus: "Desain semikonduktor/IC. Daily Task: Merancang logika gerbang transistor dalam chip prosesor komputer.", skills: "Verilog, VHDL, FPGA", salJr: "15 - 20 Juta", salMid: "20 - 35 Juta", salSr: "35 - 70 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Optimasi tata letak transistor dibantu AI (seperti yang dilakukan NVIDIA).", diff: "Sangat Tinggi", mbti: "INTP, ISTJ (Mikro)", remote: "Rendah (Lab)", pop: "Berpotensi Tinggi" },
+            { cat: "Hardware & Emerging Tech", title: "Systems Engineer", focus: "Integrasi sistem kompleks. Daily Task: Memastikan subsistem radar, komunikasi, dan mesin pada pesawat bekerja harmonis.", skills: "Systems Engineering principles", salJr: "10 - 14 Juta", salMid: "14 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sulit", aiReason: "Integrasi subsistem kompleks yang beragam.", diff: "Tinggi", mbti: "INTJ, ISTJ (Integrasi)", remote: "Sedang (Hybrid)", pop: "Sedang" },
+            { cat: "Hardware & Emerging Tech", title: "Drone Technologist", focus: "Teknologi UAV/Drone. Daily Task: Merakit drone custom untuk pemetaan lahan sawit, setting flight controller.", skills: "Flight controllers, Aerodynamics", salJr: "7 - 11 Juta", salMid: "11 - 18 Juta", salSr: "18 - 30 Juta", aiRisk: "Sulit", aiReason: "Operasional lapangan dan hardware fisik.", diff: "Sedang", mbti: "ISTP, ESTP (Pilot)", remote: "Rendah (Outdoor)", pop: "Sedang" },
+            { cat: "Hardware & Emerging Tech", title: "AR Hardware Eng.", focus: "Kacamata/headset AR. Daily Task: Riset lensa optik untuk kacamata pintar agar gambar terlihat jelas di mata.", skills: "Optics, Miniaturization", salJr: "12 - 18 Juta", salMid: "18 - 30 Juta", salSr: "30 - 60 Juta", aiRisk: "Sulit", aiReason: "Riset optik dan hardware fisik.", diff: "Tinggi", mbti: "INTP, ISTP (Optik)", remote: "Rendah (Lab)", pop: "Berpotensi Tinggi" },
+            { cat: "Hardware & Emerging Tech", title: "Wearable Tech Eng.", focus: "Teknologi yang dipakai (jam, dll). Daily Task: Mendesain sirkuit jam tangan pintar yang hemat baterai dan tahan air.", skills: "Low energy circuits, Biosensors", salJr: "10 - 15 Juta", salMid: "15 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sulit", aiReason: "Integrasi sensor ke benda fisik/tubuh manusia.", diff: "Tinggi", mbti: "INTP (Inovasi)", remote: "Rendah (Lab)", pop: "Berpotensi Tinggi" },
+            { cat: "Hardware & Emerging Tech", title: "Quantum Researcher", focus: "Komputasi kuantum. Daily Task: Eksperimen laboratorium untuk menjaga kestabilan Qubit dalam suhu super dingin.", skills: "Quantum Physics, Qiskit", salJr: "25 - 40 Juta", salMid: "40 - 70 Juta", salSr: "70 - 120 Juta+", aiRisk: "Sulit", aiReason: "Riset fisika teoritis tingkat lanjut.", diff: "Sangat Tinggi", mbti: "INTP, INTJ (Fisika)", remote: "Rendah (Lab)", pop: "Berpotensi Tinggi" },
+            { cat: "IT & Support", title: "IT Support Specialist", focus: "Bantuan umum user. Daily Task: Membantu karyawan yang lupa password, printer macet, atau laptop kena virus.", skills: "Windows/Mac troubleshooting", salJr: "5 - 7 Juta", salMid: "7 - 10 Juta", salSr: "10 - 15 Juta", aiRisk: "Mudah", aiReason: "Chatbot AI bisa selesaikan 80% masalah umum user.", diff: "Rendah", mbti: "ESFP, ISFJ (Bantu)", remote: "Sedang (Hybrid)", pop: "Tinggi" },
+            { cat: "IT & Support", title: "Helpdesk Analyst", focus: "Tiket support & remote fix. Daily Task: Menerima telepon keluhan user, mencatat tiket, dan memandu solusi via remote desktop.", skills: "Ticketing systems (ServiceNow)", salJr: "4.5 - 6.5 Juta", salMid: "6.5 - 9 Juta", salSr: "9 - 13 Juta", aiRisk: "Mudah", aiReason: "Sangat rawan digantikan chatbot cerdas.", diff: "Rendah", mbti: "ESFJ, ISFJ (Sabar)", remote: "Tinggi", pop: "Berpotensi Rendah" },
+            { cat: "IT & Support", title: "Desktop Support", focus: "Instalasi & perbaikan PC kantor. Daily Task: Menginstall ulang Windows di laptop baru karyawan dan setting email Outlook.", skills: "Hardware repair, OS imaging", salJr: "5 - 7 Juta", salMid: "7 - 10 Juta", salSr: "10 - 15 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Remote fix mudah, kerusakan hardware fisik butuh orang.", diff: "Rendah", mbti: "ISTP, ISFP (Fixer)", remote: "Rendah (On-site)", pop: "Sedang" },
+            { cat: "IT & Support", title: "Field Technician", focus: "Perbaikan di lokasi fisik. Daily Task: Datang ke kantor cabang untuk memperbaiki kabel LAN putus atau pasang CCTV.", skills: "Cabling, On-site repair", salJr: "4.5 - 7 Juta", salMid: "7 - 10 Juta", salSr: "10 - 14 Juta", aiRisk: "Sulit", aiReason: "Harus datang ke lokasi, memanjat tiang, tarik kabel.", diff: "Rendah", mbti: "ESTP, ISTP (Aktif)", remote: "Rendah (Jalanan)", pop: "Sedang" },
+            { cat: "IT & Support", title: "IT Coordinator", focus: "Aset & inventaris IT. Daily Task: Mendata stok laptop kantor, membeli mouse/keyboard baru, urus garansi servis.", skills: "Asset management, Vendor comms", salJr: "6 - 9 Juta", salMid: "9 - 13 Juta", salSr: "13 - 18 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Tracking aset otomatis, koordinasi vendor butuh manusia.", diff: "Sedang", mbti: "ESFJ, ESTJ (Admin)", remote: "Sedang (Kantor)", pop: "Sedang" },
+            { cat: "IT & Support", title: "IT Operations", focus: "Operasional harian IT. Daily Task: Memastikan proses backup data malam hari sukses, ganti tape backup fisik.", skills: "Monitoring, Backup routines", salJr: "6 - 10 Juta", salMid: "10 - 16 Juta", salSr: "16 - 22 Juta", aiRisk: "Mudah", aiReason: "Monitoring dan running job rutin sangat mudah diotomasi.", diff: "Sedang", mbti: "ISTJ (Monitor)", remote: "Sedang (Shift)", pop: "Berpotensi Rendah" },
+            { cat: "IT & Support", title: "IT Project Manager", focus: "Manajemen proyek IT. Daily Task: Membuat timeline implementasi software baru, rapat update progress mingguan.", skills: "PMP, Prince2, Gantt charts", salJr: "10 - 15 Juta", salMid: "15 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Penjadwalan/resource planning dibantu AI, manajemen orang sulit.", diff: "Sedang", mbti: "ESTJ, ENTJ (Organisir)", remote: "Sedang (Hybrid)", pop: "Tinggi" },
+            { cat: "Business & Tech Ops", title: "Business Analyst", focus: "Menerjemahkan kebutuhan bisnis ke IT. Daily Task: Wawancara user divisi keuangan, tulis dokumen kebutuhan fitur software akuntansi.", skills: "Requirement gathering, BPMN", salJr: "7 - 11 Juta", salMid: "11 - 18 Juta", salSr: "18 - 30 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Dokumentasi requirement mudah, menggali kebutuhan klien butuh softskill.", diff: "Sedang", mbti: "ENTJ, INTJ (Jembatan)", remote: "Sedang (Hybrid)", pop: "Tinggi" },
+            { cat: "Business & Tech Ops", title: "Tech Consultant", focus: "Konsultasi solusi teknologi. Daily Task: Menganalisa masalah IT klien, presentasi solusi perbaikan sistem agar lebih efisien.", skills: "Problem solving, Industry knowledge", salJr: "8 - 12 Juta", salMid: "12 - 25 Juta", salSr: "25 - 50 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Analisis data klien cepat, penyampaian saran butuh kepercayaan.", diff: "Tinggi", mbti: "ENTP, ENTJ (Saran)", remote: "Sedang (Travel)", pop: "Tinggi" },
+            { cat: "Business & Tech Ops", title: "ERP Specialist", focus: "Sistem Enterprise (SAP/Oracle). Daily Task: Setting modul HR di SAP agar sesuai peraturan cuti perusahaan.", skills: "Modul ERP (Finance/HR/Supply)", salJr: "8 - 13 Juta", salMid: "13 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Konfigurasi rumit dibantu AI, pemahaman proses bisnis manusia.", diff: "Sedang", mbti: "ISTJ, ESTJ (Proses)", remote: "Sedang (Hybrid)", pop: "Sedang" },
+            { cat: "Business & Tech Ops", title: "CRM Specialist", focus: "Manajemen hubungan pelanggan. Daily Task: Membersihkan data database customer di Salesforce, setting email blast otomatis.", skills: "Salesforce, HubSpot config", salJr: "7 - 11 Juta", salMid: "11 - 18 Juta", salSr: "18 - 30 Juta", aiRisk: "Mudah", aiReason: "Input data dan setup workflow standar mudah diotomasi.", diff: "Rendah - Sedang", mbti: "ESFJ, ESTJ (Sales Ops)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Business & Tech Ops", title: "Solutions Architect", focus: "Desain solusi teknis untuk klien. Daily Task: Mendampingi tim sales, menjelaskan secara teknis bagaimana software kita integrasi dengan sistem klien.", skills: "Pre-sales tech, System integration", salJr: "20 - 30 Juta", salMid: "30 - 50 Juta", salSr: "50 - 80 Juta", aiRisk: "Sulit", aiReason: "Menjual visi teknis dan meyakinkan klien (Persuasi).", diff: "Tinggi", mbti: "ENTP, INTJ (Sales Tech)", remote: "Sedang (Hybrid)", pop: "Tinggi" },
+            { cat: "Business & Tech Ops", title: "Tech Account Mgr", focus: "Menjaga hubungan klien teknis. Daily Task: Makan siang dengan klien lama, menanyakan kepuasan layanan, tawarkan upgrade.", skills: "Client relations, Tech roadmap", salJr: "10 - 15 Juta", salMid: "15 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sulit", aiReason: "Membangun hubungan personal jangka panjang dengan klien.", diff: "Sedang", mbti: "ENFJ, ESFJ (Relasi)", remote: "Sedang (Hybrid)", pop: "Sedang" },
+            { cat: "Business & Tech Ops", title: "Sales Engineer", focus: "Jualan dengan demo teknis. Daily Task: Melakukan demo produk software di depan calon pembeli, menjawab pertanyaan teknis sulit.", skills: "Product demo, Technical objection handling", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 40 Juta", aiRisk: "Sulit", aiReason: "Demo bisa AI, tapi negosiasi harga dan trust itu manusiawi.", diff: "Sedang", mbti: "ESTP, ENTP (Persuasi)", remote: "Sedang (Hybrid)", pop: "Tinggi" },
+            { cat: "Business & Tech Ops", title: "Technical Recruiter", focus: "HR khusus orang tech. Daily Task: Mencari profil programmer di LinkedIn, interview awal cek kecocokan budaya.", skills: "Understanding tech stacks, Sourcing", salJr: "6 - 9 Juta", salMid: "9 - 15 Juta", salSr: "15 - 25 Juta", aiRisk: "Mudah", aiReason: "Screening CV dan sourcing kandidat sudah diotomasi AI.", diff: "Rendah", mbti: "ENFJ, ESFP (People)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Business & Tech Ops", title: "IT Auditor", focus: "Audit kepatuhan sistem. Daily Task: Memeriksa log akses server untuk memastikan tidak ada akses ilegal sesuai standar ISO.", skills: "CISA, Compliance regulations", salJr: "8 - 13 Juta", salMid: "13 - 22 Juta", salSr: "22 - 40 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Cek kepatuhan otomatis, judgment akhir tetap auditor.", diff: "Sedang", mbti: "ISTJ, ESTJ (Audit)", remote: "Sedang (Site Visit)", pop: "Sedang" },
+            { cat: "Media & Creative Tech", title: "Audio Engineer", focus: "Pemrosesan suara digital. Daily Task: Membersihkan noise dari rekaman podcast, balancing volume musik dan vokal.", skills: "Pro Tools, DAW, DSP", salJr: "5 - 9 Juta", salMid: "9 - 15 Juta", salSr: "15 - 25 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Mixing/Mastering otomatis ada, seni artistik butuh telinga manusia.", diff: "Sedang", mbti: "ISFP, ISTP (Telinga)", remote: "Sedang (Studio)", pop: "Rendah" },
+            { cat: "Media & Creative Tech", title: "Video Tech Specialist", focus: "Streaming & kompresi video. Daily Task: Mengatur server live streaming agar tidak buffer saat ditonton ribuan orang.", skills: "Codecs, FFMPEG, Streaming servers", salJr: "6 - 10 Juta", salMid: "10 - 16 Juta", salSr: "16 - 25 Juta", aiRisk: "Mudah", aiReason: "Kompresi dan transcoding video adalah algoritma murni.", diff: "Sedang", mbti: "ISTP, INTP (Codec)", remote: "Tinggi", pop: "Rendah" },
+            { cat: "Media & Creative Tech", title: "VFX Tech Director", focus: "Pipeline efek visual film. Daily Task: Menulis script Python untuk mengotomatisasi render efek ledakan di film.", skills: "Python scripting, Maya API", salJr: "10 - 15 Juta", salMid: "15 - 28 Juta", salSr: "28 - 50 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Pipeline script dibantu AI, art direction manusia.", diff: "Tinggi", mbti: "INTP, INTJ (Pipeline)", remote: "Tinggi", pop: "Rendah" },
+            { cat: "Media & Creative Tech", title: "Unity/Unreal Dev", focus: "Pengembangan interaktif 3D. Daily Task: Coding logika pameran virtual 3D agar pengunjung bisa berjalan-jalan di web.", skills: "C#, C++, Blueprints", salJr: "7 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Coding logic game dibantu AI.", diff: "Sedang", mbti: "ISTP, INTP (Logika 3D)", remote: "Tinggi", pop: "Sedang" },
+            { cat: "Media & Creative Tech", title: "Digital Twin Eng.", focus: "Simulasi virtual benda fisik. Daily Task: Membuat replika 3D mesin pabrik untuk simulasi kerusakan sebelum mesin asli rusak.", skills: "3D Modeling, Simulation logic", salJr: "10 - 15 Juta", salMid: "15 - 25 Juta", salSr: "25 - 45 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Simulasi dijalankan AI, setup parameter manusia.", diff: "Tinggi", mbti: "INTJ, INTP (Simulasi)", remote: "Tinggi", pop: "Berpotensi Tinggi" },
+            { cat: "Media & Creative Tech", title: "Computational Artist", focus: "Seni dari kode (Generative Art). Daily Task: Menulis algoritma yang menghasilkan pola visual abstrak unik secara acak.", skills: "Processing, p5.js, TouchDesigner", salJr: "Variatif", salMid: "Variatif", salSr: "Variatif", aiRisk: "Sedang (Kolaborasi)", aiReason: "AI adalah alat utamanya, seniman adalah kuratornya.", diff: "Sedang", mbti: "INFP, INTP (Unik)", remote: "Tinggi", pop: "Rendah" },
+            { cat: "Media & Creative Tech", title: "Creative Technologist", focus: "Prototipe kreatif untuk iklan/seni. Daily Task: Membuat instalasi seni interaktif yang menyala jika orang lewat.", skills: "Physical computing, Mapping", salJr: "8 - 13 Juta", salMid: "13 - 22 Juta", salSr: "22 - 38 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Ideasi cepat dengan AI, eksekusi fisik butuh manusia.", diff: "Sedang", mbti: "ENTP, INTP (Eksperimen)", remote: "Sedang (Hybrid)", pop: "Rendah" },
+            { cat: "Automation & Industry", title: "PLC Programmer", focus: "Logika mesin pabrik. Daily Task: Memprogram PLC Siemens agar lengan robot bergerak mengambil barang tiap 5 detik.", skills: "Ladder Logic, Siemens/Allen-Bradley", salJr: "7 - 11 Juta", salMid: "11 - 18 Juta", salSr: "18 - 30 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Logic ladder diagram bisa di-generate, testing mesin bahaya jika tanpa orang.", diff: "Sedang", mbti: "ISTJ, ISTP (Logika)", remote: "Rendah (Pabrik)", pop: "Sedang" },
+            { cat: "Automation & Industry", title: "Ind. Automation Eng.", focus: "Otomasi lini produksi. Daily Task: Merancang layout pabrik baru agar robot dan manusia bisa bekerja berdampingan aman.", skills: "Robotics arms, Sensors", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sulit", aiReason: "Mengurus mesin berat dan keselamatan kerja fisik.", diff: "Tinggi", mbti: "ISTP, ESTJ (Mesin)", remote: "Rendah (Pabrik)", pop: "Tinggi" },
+            { cat: "Automation & Industry", title: "Factory Integrator", focus: "Menghubungkan mesin ke sistem IT. Daily Task: Memasang sensor IoT di mesin tua agar datanya bisa masuk ke dashboard manajer.", skills: "IoT Industrial, MES systems", salJr: "8 - 12 Juta", salMid: "12 - 20 Juta", salSr: "20 - 35 Juta", aiRisk: "Sulit", aiReason: "Menghubungkan kabel dan mesin fisik di pabrik.", diff: "Tinggi", mbti: "ISTP (Integrasi)", remote: "Rendah (Pabrik)", pop: "Sedang" },
+            { cat: "Automation & Industry", title: "SCADA Engineer", focus: "Kontrol pengawasan industri. Daily Task: Mendesain layar HMI agar operator pabrik mudah memantau status tangki kimia.", skills: "SCADA software (Wonderware/Ignition)", salJr: "8 - 13 Juta", salMid: "13 - 22 Juta", salSr: "22 - 38 Juta", aiRisk: "Sedang (Kolaborasi)", aiReason: "Monitoring otomatis, setup sistem butuh ahli.", diff: "Sedang", mbti: "ISTJ (Kontrol)", remote: "Rendah (Control Room)", pop: "Sedang" },
+            { cat: "Automation & Industry", title: "Control Systems Eng.", focus: "Teori kontrol mesin. Daily Task: Menghitung rumus PID agar suhu oven pabrik tetap stabil presisi.", skills: "PID loops, Matlab/Simulink", salJr: "9 - 14 Juta", salMid: "14 - 25 Juta", salSr: "25 - 40 Juta", aiRisk: "Sulit", aiReason: "Matematika kontrol mesin kritis (safety critical).", diff: "Tinggi", mbti: "INTP, INTJ (Matematika)", remote: "Rendah (Pabrik)", pop: "Sedang" }
+        ];
+
+        /* ==========================================================
+           DATABASE 2: LIBRARY / CODEX (REFERENCE)
+           ========================================================== */
+        const libraryDB = [
+            // LANGUAGES
+            { type: "Language", name: "Python", icon: "🐍", desc: "Bahasa serbaguna terpopuler. Syntax mirip bahasa Inggris. Raja di Data Science & AI." },
+            { type: "Language", name: "JavaScript", icon: "📜", desc: "Bahasa wajib web. Membuat website interaktif (animasi, klik, dll). Jalan di browser." },
+            { type: "Language", name: "TypeScript", icon: "🛡️", desc: "Versi upgrade JavaScript dengan fitur keamanan tipe data. Standar industri app besar." },
+            { type: "Language", name: "Java", icon: "☕", desc: "Bahasa senior yang sangat stabil. Dipakai Bank & Enterprise besar." },
+            { type: "Language", name: "C++", icon: "🚀", desc: "Bahasa performa super tinggi. Dipakai untuk Game Engine & OS." },
+            { type: "Language", name: "C#", icon: "#️⃣", desc: "Andalan Microsoft. Sangat populer untuk Game Dev (Unity) & App Windows." },
+            { type: "Language", name: "Go", icon: "🐹", desc: "Bahasa buatan Google. Sangat cepat untuk server & cloud modern." },
+            { type: "Language", name: "Rust", icon: "🦀", desc: "Bahasa ultra-aman & cepat. Mulai menggantikan C++ di sistem kritis." },
+            { type: "Language", name: "Solidity", icon: "💎", desc: "Bahasa khusus Smart Contract di Ethereum/Blockchain." },
+            { type: "Language", name: "PHP", icon: "🐘", desc: "Legenda backend web. Menggerakkan WordPress & Facebook awal." },
+            { type: "Language", name: "Swift", icon: "🍎", desc: "Bahasa buatan Apple untuk bikin aplikasi iOS/Mac." },
+            { type: "Language", name: "SQL", icon: "🗄️", desc: "Bahasa wajib untuk bicara dengan Database (ambil/simpan data)." },
+            
+            // FRAMEWORKS
+            { type: "Framework", name: "React", icon: "⚛️", desc: "Library UI buatan Facebook. Paling populer untuk frontend web modern." },
+            { type: "Framework", name: "Vue", icon: "🟢", desc: "Framework frontend ringan & mudah dipelajari. Saingan React." },
+            { type: "Framework", name: "Next.js", icon: "▲", desc: "Framework React fullstack. Standar baru web development modern." },
+            { type: "Framework", name: "Node.js", icon: "🟩", desc: "Menjalankan JavaScript di server (backend), bukan cuma di browser." },
+            { type: "Framework", name: "Flutter", icon: "🦋", desc: "Bikin 1 kode, jalan di Android & iOS. Buatan Google." },
+            { type: "Framework", name: "Django", icon: "🤠", desc: "Framework Python komplit untuk web backend yang aman & cepat." },
+            { type: "Framework", name: "Laravel", icon: "🏯", desc: "Framework PHP modern yang elegan dan masih sangat populer." },
+            { type: "Framework", name: "TensorFlow", icon: "🧠", desc: "Library AI/Deep Learning buatan Google." },
+            { type: "Framework", name: "Unity", icon: "🎮", desc: "Game Engine paling populer untuk game mobile & indie." },
+
+            // TOOLS
+            { type: "Tool", name: "Git", icon: "🌲", desc: "Mesin waktu kode. Mencatat setiap perubahan revisi coding." },
+            { type: "Tool", name: "Docker", icon: "🐳", desc: "Membungkus aplikasi jadi kontainer agar jalan di mana saja." },
+            { type: "Tool", name: "Kubernetes", icon: "☸️", desc: "Kapten kapal yang mengatur ribuan kontainer Docker." },
+            { type: "Tool", name: "AWS", icon: "☁️", desc: "Raja Cloud Computing. Sewa server raksasa lewat internet." },
+            { type: "Tool", name: "Figma", icon: "🎨", desc: "Alat desain UI/UX kolaboratif. Standar wajib desainer." },
+            { type: "Tool", name: "Jira", icon: "🎫", desc: "Alat manajemen tugas tim Agile. Papan tulis digital." },
+            { type: "Tool", name: "PostgreSQL", icon: "🐘", desc: "Database open-source paling canggih & andal saat ini." },
+            { type: "Tool", name: "Kali Linux", icon: "🐉", desc: "OS khusus Hacker berisi ratusan alat peretas." },
+            { type: "Tool", name: "Jenkins", icon: "🤵", desc: "Robot otomatis untuk tes & kirim kode ke server (CI/CD)." },
+
+            // CONCEPTS
+            { type: "Concept", name: "Agile", icon: "🏃", desc: "Metode kerja cepat, fleksibel, & bertahap (bukan sekaligus)." },
+            { type: "Concept", name: "DevOps", icon: "♾️", desc: "Budaya gabungan Dev & Ops agar rilis software ngebut." },
+            { type: "Concept", name: "Blockchain", icon: "🔗", desc: "Buku besar digital yang tersebar & tidak bisa dipalsukan." },
+            { type: "Concept", name: "Machine Learning", icon: "🤖", desc: "Mengajar komputer belajar dari data tanpa diprogram eksplisit." },
+            { type: "Concept", name: "API", icon: "🔌", desc: "Jembatan penghubung antar aplikasi berbeda agar bisa bicara." },
+            { type: "Concept", name: "CI/CD", icon: "🚀", desc: "Otomatisasi pengiriman kode dari laptop ke server live." },
+            { type: "Concept", name: "Microservices", icon: "📦", desc: "Memecah aplikasi besar jadi layanan kecil-kecil mandiri." },
+
+            // SOFT SKILLS
+            { type: "Soft Skill", name: "Problem Solving", icon: "🧩", desc: "Kemampuan memecah masalah rumit jadi solusi logis." },
+            { type: "Soft Skill", name: "Critical Thinking", icon: "🤔", desc: "Selalu bertanya 'kenapa' & tidak telan info mentah-mentah." },
+            { type: "Soft Skill", name: "Communication", icon: "🗣️", desc: "Menjelaskan hal teknis rumit ke orang awam/bisnis." },
+            { type: "Soft Skill", name: "Empathy", icon: "❤️", desc: "Memahami frustrasi user saat memakai aplikasi buatanmu." },
+            { type: "Soft Skill", name: "Adaptability", icon: "🦎", desc: "Cepat belajar teknologi baru karena Tech berubah kilat." }
+        ];
+
+        /* ==========================================================
+           SMART SKILL DICTIONARY & LOGIC
+           ========================================================== */
+        let skillDictionary = {}; // Maps lowercase skill -> desc
+        let uniqueSkills = [];
+        let selectedSkills = new Set();
+        let compareMode = false;
+        let compareList = [];
+        let currentRenderedJobs = [];
+
+        function init() {
+            populateSkillDictionary();
+            extractSkills();
+            renderCategoryButtons();
+            renderJobs();
+            renderSkillPicker();
+            filterLibrary('all', document.querySelector('.lib-tab.active'));
+        }
+
+        // 1. POPULATE DICTIONARY (Gabung LibraryDB + Extra Definitions)
+        function populateSkillDictionary() {
+            // Load from LibraryDB first
+            libraryDB.forEach(item => {
+                skillDictionary[item.name.toLowerCase()] = item.desc;
+            });
+
+            // Add Extra Definitions specific to JobsDB (e.g. Industry terms)
+            const extraDefs = {
+                "iot industrial": "Penerapan Internet of Things (sensor/konektivitas) pada mesin pabrik untuk monitoring efisiensi.",
+                "plc": "Programmable Logic Controller. Komputer industri tahan banting untuk mengontrol mesin manufaktur.",
+                "ladder logic": "Bahasa pemrograman grafis standar untuk memprogram PLC, mirip diagram rangkaian listrik.",
+                "scada software": "Sistem pengawasan dan kontrol data industri secara real-time dari jarak jauh.",
+                "mes systems": "Manufacturing Execution System. Software untuk melacak proses produksi dari bahan mentah ke barang jadi.",
+                "robotics arms": "Lengan mekanis yang dapat diprogram untuk tugas pengelasan, perakitan, atau pemindahan barang.",
+                "pid loops": "Algoritma kontrol umpan balik untuk menjaga kestabilan suhu, tekanan, atau kecepatan mesin.",
+                "cryptography": "Ilmu teknik enkripsi data. Dasar keamanan blockchain dan komunikasi internet.",
+                "hyperledger": "Platform blockchain open-source untuk keperluan bisnis/enterprise (Private Chain).",
+                "smart contract": "Program yang berjalan otomatis di atas blockchain ketika syarat tertentu terpenuhi.",
+                "tokenomics": "Ekonomi token. Ilmu merancang supply, demand, dan insentif dalam ekosistem kripto.",
+                "scrum guide": "Panduan resmi aturan main metode Scrum dalam manajemen proyek Agile.",
+                "safe": "Scaled Agile Framework. Cara menerapkan Agile di perusahaan skala besar (ratusan orang).",
+                "sast/dast": "Static/Dynamic Application Security Testing. Tools untuk scan celah keamanan pada kode.",
+                "wcag guidelines": "Standar internasional agar website bisa diakses oleh penyandang disabilitas.",
+                "terraform": "Tool 'Infrastructure as Code'. Mengatur server cloud lewat kode, bukan klik manual.",
+                "selenium": "Tool untuk mengotomatisasi browser web. Biasa dipakai untuk testing otomatis.",
+                "tableau": "Software visualisasi data bisnis yang mengubah angka menjadi grafik interaktif.",
+                "hadoop": "Framework untuk memproses data super besar (Big Data) secara terdistribusi.",
+                "kafka": "Platform streaming data real-time. Biasa dipakai untuk pipeline data skala besar.",
+                "siem tools": "Security Information and Event Management. Pusat monitoring log keamanan jaringan.",
+                "wireshark": "Alat analisis paket jaringan. Bisa 'melihat' data apa saja yang lewat di kabel.",
+                "reverse engineering": "Membongkar software jadi untuk mempelajari cara kerjanya (biasanya malware).",
+                "verilog": "Bahasa deskripsi perangkat keras (HDL) untuk mendesain chip elektronik.",
+                "ros": "Robot Operating System. Framework standar dunia untuk memprogram robot.",
+                "bpmn": "Business Process Model and Notation. Standar diagram alur proses bisnis.",
+                "salesforce": "Platform CRM (Customer Relationship Management) nomor 1 di dunia.",
+                "cisa": "Sertifikasi bergengsi untuk auditor sistem informasi.",
+                "ffmpeg": "Koleksi software gratis untuk merekam, konversi, dan streaming audio/video.",
+                "blender": "Software 3D gratis super powerful untuk modeling, animasi, dan rendering.",
+                "mqtt": "Protokol pesan ringan untuk komunikasi antar perangkat IoT.",
+                "qiskit": "Framework open-source IBM untuk memprogram komputer kuantum."
+            };
+
+            Object.assign(skillDictionary, extraDefs);
+        }
+
+        function extractSkills() {
+            const skillSet = new Set();
+            jobsDB.forEach(job => {
+                job.skills.split(',').forEach(s => skillSet.add(s.trim()));
+            });
+            uniqueSkills = Array.from(skillSet).sort();
+        }
+
+        function renderSkillPicker() {
+            const container = document.getElementById('skill-container');
+            container.innerHTML = '';
+            uniqueSkills.forEach(skill => {
+                const tag = document.createElement('div');
+                tag.className = 'skill-tag';
+                tag.innerText = skill;
+                tag.onclick = () => toggleSkill(skill, tag);
+                container.appendChild(tag);
+            });
+        }
+
+        function toggleSkill(skill, el) {
+            if(selectedSkills.has(skill)) {
+                selectedSkills.delete(skill);
+                el.classList.remove('selected');
+            } else {
+                selectedSkills.add(skill);
+                el.classList.add('selected');
+            }
+            updateFilter();
+        }
+
+        // --- FILTER ---
+        function parseSalary(str) {
+            if(!str) return 0;
+            const clean = str.replace(/[^0-9-]/g, '');
+            const parts = clean.split('-');
+            return parseInt(parts[0]) || 0;
+        }
+
+        function updateFilter() {
+            document.getElementById('val-jr').innerText = document.getElementById('range-jr').value + ' Jt';
+            document.getElementById('val-mid').innerText = document.getElementById('range-mid').value + ' Jt';
+            document.getElementById('val-sr').innerText = document.getElementById('range-sr').value + ' Jt';
+
+            const minJr = parseInt(document.getElementById('range-jr').value);
+            const minMid = parseInt(document.getElementById('range-mid').value);
+            const minSr = parseInt(document.getElementById('range-sr').value);
+
+            const remoteVals = Array.from(document.querySelectorAll('.f-remote:checked')).map(cb => cb.value);
+            const diffVals = Array.from(document.querySelectorAll('.f-diff:checked')).map(cb => cb.value);
+
+            const filtered = jobsDB.filter(job => {
+                const sJr = parseSalary(job.salJr);
+                const sMid = parseSalary(job.salMid);
+                const sSr = parseSalary(job.salSr);
+                if(sJr < minJr || sMid < minMid || sSr < minSr) return false;
+
+                if(remoteVals.length > 0) {
+                    const match = remoteVals.some(val => job.remote.toLowerCase().includes(val.toLowerCase()));
+                    if(!match) return false;
+                }
+                if(diffVals.length > 0) {
+                    const match = diffVals.some(val => job.diff.toLowerCase().includes(val.toLowerCase()));
+                    if(!match) return false;
+                }
+                if(selectedSkills.size > 0) {
+                    const hasSkill = Array.from(selectedSkills).some(s => job.skills.toLowerCase().includes(s.toLowerCase()));
+                    if(!hasSkill) return false;
+                }
+                return true;
+            });
+            renderJobs(filtered);
+        }
+
+        function filterSkillTags() {
+            const term = document.getElementById('skill-search').value.toLowerCase();
+            document.querySelectorAll('.skill-tag').forEach(tag => {
+                tag.style.display = tag.innerText.toLowerCase().includes(term) ? 'block' : 'none';
+            });
+        }
+
+        function resetFilters() {
+            document.getElementById('range-jr').value = 0;
+            document.getElementById('range-mid').value = 0;
+            document.getElementById('range-sr').value = 0;
+            document.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false);
+            
+            selectedSkills.clear();
+            document.querySelectorAll('.skill-tag').forEach(t => t.classList.remove('selected'));
+            document.getElementById('skill-search').value = '';
+            filterSkillTags(); 
+            updateFilter();
+        }
+
+        // --- RENDER JOBS ---
+        function renderCategoryButtons() {
+            const catContainer = document.getElementById('cat-grid-target');
+            const uniqueCats = [...new Set(jobsDB.map(item => item.cat))];
+            uniqueCats.forEach(cat => {
+                const btn = document.createElement('a');
+                btn.className = 'cat-btn';
+                btn.innerText = cat;
+                btn.href = `#cat-${cat.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                catContainer.appendChild(btn);
+            });
+        }
+
+        function renderJobs(data = jobsDB) {
+            currentRenderedJobs = data;
+            const container = document.getElementById('main-container');
+            container.innerHTML = '';
+            let currentCat = '';
+            let gridContainer = null;
+
+            if(data.length === 0) {
+                container.innerHTML = '<div style="text-align:center; font-size:1.5rem; color:#aaa; padding:50px;">NO JOBS FOUND</div>';
+                return;
+            }
+
+            data.forEach((job, index) => {
+                if (job.cat !== currentCat) {
+                    const section = document.createElement('div');
+                    section.className = 'category-block';
+                    section.id = `cat-${job.cat.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                    const header = document.createElement('div');
+                    header.className = 'category-header';
+                    header.innerText = job.cat;
+                    section.appendChild(header);
+                    gridContainer = document.createElement('div');
+                    gridContainer.className = 'grid';
+                    section.appendChild(gridContainer);
+                    container.appendChild(section);
+                    currentCat = job.cat;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                if(compareList.some(c => c.title === job.title)) card.classList.add('selected-compare');
+                const randRot = Math.random() * 360;
+                
+                card.innerHTML = `
+                    <div class="card-deco" style="transform: rotate(${randRot}deg); border-radius: ${randRot > 180 ? '30% 70% 70% 30% / 30% 30% 70% 70%' : '50%' }"></div>
+                    <div>
+                        <h3>${job.title}</h3>
+                        <p>${job.focus.substring(0, 80)}${job.focus.length > 80 ? '...' : ''}</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="pill" style="background:${getDifficultyColor(job.diff)}">Lvl: ${parseDiff(job.diff)}</span>
+                        <span class="pill" style="background: #eee;">Pop: ${parsePop(job.pop)}</span>
+                    </div>
+                `;
+                card.onclick = () => handleCardClick(index);
+                gridContainer.appendChild(card);
+            });
+        }
+
+        // --- LIBRARY ---
+        function filterLibrary(type, btnEl) {
+            if(btnEl) {
+                document.querySelectorAll('.lib-tab').forEach(b => b.classList.remove('active'));
+                btnEl.classList.add('active');
+            }
+            const container = document.getElementById('lib-grid-target');
+            container.innerHTML = '';
+            const filtered = type === 'all' ? libraryDB : libraryDB.filter(x => x.type === type);
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'lib-card';
+                card.innerHTML = `
+                    <div class="lib-card-inner">
+                        <div class="lib-front">
+                            <div class="lib-icon">${item.icon}</div>
+                            <div class="lib-title">${item.name}</div>
+                            <div class="lib-cat">${item.type}</div>
+                        </div>
+                        <div class="lib-back">
+                            <div class="lib-title" style="font-size:1.2rem; margin-bottom:10px;">${item.name}</div>
+                            <div class="lib-desc">${item.desc}</div>
+                        </div>
+                    </div>`;
+                container.appendChild(card);
+            });
+        }
+
+        // --- COMPARE ---
+        function toggleCompareMode() {
+            compareMode = !compareMode;
+            const btn = document.getElementById('compare-mode-btn');
+            if(compareMode) {
+                btn.innerHTML = "✅ COMPARE MODE ACTIVE"; btn.classList.add('active');
+            } else {
+                btn.innerHTML = "⚔️ ENABLE COMPARE MODE"; btn.classList.remove('active');
+                compareList = []; updateCompareUI();
+            }
+            updateFilter(); 
+        }
+
+        function handleCardClick(index) {
+            if(!compareMode) { openModal(index); } 
+            else {
+                const job = currentRenderedJobs[index];
+                const existingIdx = compareList.findIndex(j => j.title === job.title);
+                if(existingIdx > -1) { compareList.splice(existingIdx, 1); } 
+                else {
+                    if(compareList.length < 2) { compareList.push(job); } 
+                    else { alert("Maximum 2 jobs for comparison!"); }
+                }
+                updateCompareUI();
+            }
+        }
+
+        function updateCompareUI() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const title = card.querySelector('h3').innerText;
+                if(compareList.some(c => c.title === title)) card.classList.add('selected-compare');
+                else card.classList.remove('selected-compare');
+            });
+            const fab = document.getElementById('compare-fab');
+            if(compareList.length > 0) {
+                fab.style.display = 'block'; fab.innerText = `COMPARE SELECTED (${compareList.length}/2)`;
+            } else { fab.style.display = 'none'; }
+        }
+
+        function openCompareModal() {
+            if(compareList.length < 1) return;
+            const leftC = document.getElementById('compare-left');
+            const rightC = document.getElementById('compare-right');
+            const renderCol = (job, container) => {
+                if(!job) { container.innerHTML = ''; return; }
+                container.className = 'compare-col';
+                container.innerHTML = `
+                    <h3 style="font-size:1.8rem; margin-bottom:10px; line-height:1.1;">${job.title}</h3>
+                    <div class="pill" style="margin-bottom:20px;">${job.cat}</div>
+                    <div class="info-group"><span class="info-label">Salary (Senior)</span><div style="font-size:1.2rem; font-weight:bold; color:var(--pop-green); border-bottom:2px dashed #ddd;">${job.salSr}</div></div>
+                    <div class="info-group"><span class="info-label">Popularity</span><div class="bar-wrapper"><div class="bar-fill" style="width:${getPercent(job.pop)}%; background:var(--pop-cyan);"></div></div></div>
+                    <div class="info-group"><span class="info-label">Difficulty</span><div class="bar-wrapper"><div class="bar-fill" style="width:${getPercent(job.diff)}%; background:var(--pop-orange);"></div></div><small>${job.diff}</small></div>
+                    <div class="info-group"><span class="info-label">Key Skills</span><p style="font-size:0.9rem; font-weight:600;">${job.skills}</p></div>`;
+            };
+            renderCol(compareList[0], leftC); renderCol(compareList[1], rightC);
+            document.getElementById('compareModal').style.display = 'flex';
+        }
+
+        // --- HELPERS ---
+        function parseDiff(t) { return t.toLowerCase().includes('sangat') ? 'SS' : (t.toLowerCase().includes('tinggi') ? 'Hard' : (t.toLowerCase().includes('sedang') ? 'Med' : 'Easy')); }
+        function parsePop(t) { return t.toLowerCase().includes('tinggi') ? 'High' : (t.toLowerCase().includes('sedang') ? 'Mid' : 'Low'); }
+        function getDifficultyColor(t) { return t.toLowerCase().includes('tinggi') ? 'var(--pop-orange)' : (t.toLowerCase().includes('sedang') ? 'var(--pop-yellow)' : 'var(--pop-green)'); }
+        function getPercent(t) {
+            const x = t.toLowerCase();
+            if(x.includes('sangat')||x.includes('sulit')) return 95;
+            if(x.includes('tinggi')) return 80;
+            if(x.includes('sedang')) return 50;
+            return 25;
+        }
+
+        // --- OPEN MODAL & SKILL DEF ---
+        function openModal(index) {
+            const data = currentRenderedJobs[index];
+            const modal = document.getElementById('questModal');
+            
+            document.getElementById('m-title').innerText = data.title;
+            document.getElementById('m-cat').innerText = data.cat;
+            document.getElementById('m-focus').innerText = data.focus;
+            document.getElementById('m-mbti').innerText = data.mbti;
+            document.getElementById('txt-pop').innerText = data.pop;
+            document.getElementById('txt-diff').innerText = data.diff;
+            document.getElementById('txt-ai-reason').innerText = `"${data.aiReason}"`;
+            document.getElementById('m-salary').innerHTML = `<div>JR: ${data.salJr}</div><div>MID: ${data.salMid}</div><div>SR: ${data.salSr}</div>`;
+
+            const skillsContainer = document.getElementById('m-skills');
+            skillsContainer.innerHTML = '';
+            data.skills.split(',').forEach(s => {
+                const cleanSkill = s.trim();
+                const pill = document.createElement('span');
+                // Add 'clickable' class and click event
+                pill.className = 'pill clickable'; 
+                pill.innerText = cleanSkill;
+                pill.style.background = '#e0f7fa';
+                pill.onclick = (e) => {
+                    e.stopPropagation(); // Prevent closing modal if needed
+                    openSkillDef(cleanSkill);
+                };
+                skillsContainer.appendChild(pill);
+            });
+
+            setBar('bar-pop', getPercent(data.pop));
+            setBar('bar-diff', getPercent(data.diff));
+            let sRate = 50;
+            if(data.aiRisk.toLowerCase().includes('mudah')) sRate = 20; 
+            else if(data.aiRisk.toLowerCase().includes('tinggi')) sRate = 90;
+            const aiBar = document.getElementById('bar-ai');
+            setBar('bar-ai', sRate);
+            aiBar.style.background = sRate > 70 ? 'var(--pop-green)' : (sRate < 40 ? 'var(--pop-red)' : 'var(--pop-orange)');
+
+            modal.style.display = 'flex';
+        }
+
+        function openSkillDef(skillName) {
+            // Search dictionary (case insensitive)
+            let desc = "Deskripsi spesifik belum tersedia di database.";
+            const key = skillName.toLowerCase();
+            
+            // Try exact match
+            if(skillDictionary[key]) {
+                desc = skillDictionary[key];
+            } else {
+                // Try partial match
+                for (const k in skillDictionary) {
+                    if (k.includes(key) || key.includes(k)) {
+                        desc = skillDictionary[k];
+                        break;
+                    }
+                }
+            }
+
+            document.getElementById('skill-def-title').innerText = skillName;
+            document.getElementById('skill-def-desc').innerText = desc;
+            document.getElementById('skillDefModal').style.display = 'flex';
+        }
+
+        function setBar(id, percent) {
+            const bar = document.getElementById(id);
+            bar.style.width = '0%';
+            setTimeout(() => { bar.style.width = percent + '%'; }, 100);
+        }
+
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        window.onclick = (e) => {
+            if(e.target.classList.contains('modal-backdrop')) e.target.style.display = 'none';
+        }
+        function setActive(el) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        init();
+
+    </script>
+</body>
+</html>
